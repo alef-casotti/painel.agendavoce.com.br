@@ -1,16 +1,17 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="flex h-screen bg-gray-50">
+<div class="flex min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
     <x-sidebar />
+    <x-header />
 
     <!-- Main Content -->
-    <main class="flex-1 overflow-y-auto">
+    <main class="flex-1 ml-64 mt-16 overflow-y-auto">
         <div class="p-8">
-            <!-- Header -->
-            <div class="mb-6">
-                <h1 class="text-3xl font-bold text-gray-800">Área Administrativa</h1>
-                <p class="text-gray-500 mt-1">Acesso completo a todas as funcionalidades</p>
+            <!-- Page Header -->
+            <div class="mb-8">
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">Área Administrativa</h1>
+                <p class="text-gray-600">Acesso completo a todas as funcionalidades</p>
             </div>
 
             <!-- Messages -->
@@ -38,7 +39,7 @@
 
             <!-- Cards -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="bg-white rounded-xl shadow-sm p-6 border-2 border-red-200">
+                <div class="card p-6 border-2 border-red-200">
                     <div class="flex items-center mb-4">
                         <div class="p-3 bg-red-100 rounded-lg">
                             <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -50,7 +51,7 @@
                     <p class="text-gray-600 text-sm">Você está na área administrativa com acesso total ao sistema.</p>
                 </div>
 
-                <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200 hover:border-green-500 transition-colors">
+                <div class="card p-6 border border-gray-200 hover:border-green-500 transition-colors">
                     <div class="flex items-center mb-4">
                         <div class="p-3 bg-green-100 rounded-lg">
                             <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -65,7 +66,7 @@
                     </a>
                 </div>
 
-                <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200 hover:border-blue-500 transition-colors">
+                <div class="card p-6 border border-gray-200 hover:border-blue-500 transition-colors">
                     <div class="flex items-center mb-4">
                         <div class="p-3 bg-blue-100 rounded-lg">
                             <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

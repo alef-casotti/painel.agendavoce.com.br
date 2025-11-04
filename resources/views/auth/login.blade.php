@@ -101,7 +101,6 @@
             font-family: 'Source Sans Pro', sans-serif;
             font-weight: 700;
             letter-spacing: -0.015em;
-            color: #2563eb;
             line-height: 1.2;
         }
         .login-title {

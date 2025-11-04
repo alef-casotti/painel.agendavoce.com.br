@@ -1,16 +1,17 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="flex h-screen bg-gray-50">
+<div class="flex min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
     <x-sidebar />
+    <x-header />
 
     <!-- Main Content -->
-    <main class="flex-1 overflow-y-auto">
+    <main class="flex-1 ml-64 mt-16 overflow-y-auto">
         <div class="p-8">
-            <!-- Header -->
-            <div class="mb-6">
-                <h1 class="text-3xl font-bold text-gray-800">Área de Suporte</h1>
-                <p class="text-gray-500 mt-1">Gerencie atendimentos e tickets</p>
+            <!-- Page Header -->
+            <div class="mb-8">
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">Área de Suporte</h1>
+                <p class="text-gray-600">Gerencie atendimentos e tickets</p>
             </div>
 
             <!-- Messages -->
@@ -37,7 +38,7 @@
             </div>
 
             <!-- Content Card -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <div class="card p-6">
                 <h2 class="text-xl font-semibold text-gray-800 mb-4">Funcionalidades de Suporte</h2>
                 <p class="text-gray-600 mb-4">Esta é a área de suporte. Aqui você pode gerenciar:</p>
                 <div class="space-y-3">
