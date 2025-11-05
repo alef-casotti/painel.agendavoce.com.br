@@ -7,6 +7,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\FinanceiroController;
 use App\Http\Controllers\SuporteController;
 use App\Http\Controllers\BuscaController;
+use App\Http\Controllers\ProfileController;
 
 /*
 |--------------------------------------------------------------------------
@@ -53,4 +54,11 @@ Route::middleware(['auth'])->group(function () {
 
     // Busca global
     Route::get('/busca', [BuscaController::class, 'index'])->name('busca.index');
+
+    // Perfil do usuário
+    Route::prefix('profile')->name('profile.')->group(function () {
+        Route::get('/', [ProfileController::class, 'index'])->name('index');
+        Route::put('/', [ProfileController::class, 'update'])->name('update');
+        Route::put('/password', [ProfileController::class, 'updatePassword'])->name('password.update');
+    });
 });

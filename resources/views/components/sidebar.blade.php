@@ -19,6 +19,14 @@
             <span class="font-medium">Dashboard</span>
         </a>
 
+        <a href="{{ route('profile.index') }}" 
+           class="sidebar-link flex items-center px-4 py-3 {{ str_contains($currentRoute, 'profile') ? 'active text-blue-700 bg-white border-r-2 border-blue-600 shadow-sm' : 'text-blue-900 hover:bg-white/60' }} rounded-lg transition-all group">
+            <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+            </svg>
+            <span class="font-medium">Meu Perfil</span>
+        </a>
+
         @if($user->isAdmin() || $user->isFinanceiro())
             <a href="{{ route('financeiro.index') }}" 
                class="sidebar-link flex items-center px-4 py-3 {{ str_contains($currentRoute, 'financeiro') ? 'active text-blue-700 bg-white border-r-2 border-blue-600 shadow-sm' : 'text-blue-900 hover:bg-white/60' }} rounded-lg transition-all group">
