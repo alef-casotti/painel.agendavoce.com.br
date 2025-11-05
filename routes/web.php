@@ -6,6 +6,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\FinanceiroController;
 use App\Http\Controllers\SuporteController;
+use App\Http\Controllers\BuscaController;
 
 /*
 |--------------------------------------------------------------------------
@@ -45,5 +46,11 @@ Route::middleware(['auth'])->group(function () {
     // Área Suporte (admin e suporte)
     Route::middleware(['role:admin,suporte'])->prefix('suporte')->name('suporte.')->group(function () {
         Route::get('/', [SuporteController::class, 'index'])->name('index');
+        Route::get('/ticket/{id}', [SuporteController::class, 'visualizar'])->name('visualizar');
+        Route::post('/ticket/{id}/responder', [SuporteController::class, 'responder'])->name('responder');
+        Route::post('/ticket/{id}/fechar', [SuporteController::class, 'fechar'])->name('fechar');
     });
+
+    // Busca global
+    Route::get('/busca', [BuscaController::class, 'index'])->name('busca.index');
 });

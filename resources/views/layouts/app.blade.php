@@ -130,6 +130,7 @@
     
     @vite(['resources/js/app.js'])
     @yield('styles')
+    @stack('scripts')
 </head>
 <body class="bg-gray-50 antialiased">
     @yield('content')
