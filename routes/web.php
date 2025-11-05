@@ -8,6 +8,7 @@ use App\Http\Controllers\FinanceiroController;
 use App\Http\Controllers\SuporteController;
 use App\Http\Controllers\BuscaController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\UserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -37,6 +38,9 @@ Route::middleware(['auth'])->group(function () {
     // Área Admin (apenas admin)
     Route::middleware(['role:admin'])->prefix('admin')->name('admin.')->group(function () {
         Route::get('/', [AdminController::class, 'index'])->name('index');
+        
+        // Gerenciamento de Usuários
+        Route::resource('users', UserController::class);
     });
 
     // Área Financeiro (admin e financeiro)
