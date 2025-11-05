@@ -58,7 +58,7 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // Busca global
-    Route::get('/busca', [BuscaController::class, 'index'])->name('busca.index');
+    Route::get('/busca', [BuscaController::class, 'index'])->name('busca.index'); 
 
     // Perfil do usuário
     Route::prefix('profile')->name('profile.')->group(function () {
