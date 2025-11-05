@@ -6,6 +6,9 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\FinanceiroController;
 use App\Http\Controllers\SuporteController;
+use App\Http\Controllers\BuscaController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\UserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -35,6 +38,9 @@ Route::middleware(['auth'])->group(function () {
     // Área Admin (apenas admin)
     Route::middleware(['role:admin'])->prefix('admin')->name('admin.')->group(function () {
         Route::get('/', [AdminController::class, 'index'])->name('index');
+        
+        // Gerenciamento de Usuários
+        Route::resource('users', UserController::class);
     });
 
     // Área Financeiro (admin e financeiro)
@@ -45,5 +51,18 @@ Route::middleware(['auth'])->group(function () {
     // Área Suporte (admin e suporte)
     Route::middleware(['role:admin,suporte'])->prefix('suporte')->name('suporte.')->group(function () {
         Route::get('/', [SuporteController::class, 'index'])->name('index');
+        Route::get('/ticket/{id}', [SuporteController::class, 'visualizar'])->name('visualizar');
+        Route::post('/ticket/{id}/responder', [SuporteController::class, 'responder'])->name('responder');
+        Route::post('/ticket/{id}/fechar', [SuporteController::class, 'fechar'])->name('fechar');
+    });
+
+    // Busca global
+    Route::get('/busca', [BuscaController::class, 'index'])->name('busca.index');
+
+    // Perfil do usuário
+    Route::prefix('profile')->name('profile.')->group(function () {
+        Route::get('/', [ProfileController::class, 'index'])->name('index');
+        Route::put('/', [ProfileController::class, 'update'])->name('update');
+        Route::put('/password', [ProfileController::class, 'updatePassword'])->name('password.update');
     });
 });

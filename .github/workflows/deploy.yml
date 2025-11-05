@@ -1,0 +1,28 @@
+name: Deploy Laravel to Production
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Deploy Laravel App
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Configurar SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Adicionar servidor ao known_hosts
+        run: |
+          ssh-keyscan -H 15.235.33.239 >> ~/.ssh/known_hosts
+
+      - name: Rodar script de deploy remoto
+        run: |
+          ssh root@15.235.33.239 "bash /root/deploy_painel.sh"
