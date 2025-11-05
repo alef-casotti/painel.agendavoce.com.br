@@ -23,6 +23,7 @@ use App\Http\Controllers\UserController;
 
 // Rotas de autenticação
 Route::middleware(['guest'])->group(function () {
+    Route::get('/', [LoginController::class, 'showLoginForm'])->name('login');
     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [LoginController::class, 'login']);
 });
