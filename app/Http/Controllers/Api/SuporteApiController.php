@@ -11,15 +11,28 @@ use App\Models\Message;
 class SuporteApiController extends Controller
 {
     /**
-     * Cliente envia mensagem (cria ticket se não existir)
+     * Cliente envia mensagem (cria ticket novo ou adiciona a ticket existente)
      */
     public function enviarMensagem(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'email' => 'required|email',
-            'assunto' => 'required|string|max:255',
+        // Validação condicional: se tem ticket_id, só precisa de mensagem
+        // Se não tem ticket_id, precisa de email, assunto e mensagem
+        $rules = [
             'mensagem' => 'required|string|min:10',
-        ]);
+            'prioridade' => 'nullable|in:alta,normal',
+        ];
+
+        if ($request->has('ticket_id')) {
+            // Se tem ticket_id, valida apenas ticket_id e mensagem
+            $rules['ticket_id'] = 'required|integer|exists:tickets,id';
+            $rules['email'] = 'nullable|email'; // Opcional para validação de segurança
+        } else {
+            // Se não tem ticket_id, precisa criar novo ticket
+            $rules['email'] = 'required|email';
+            $rules['assunto'] = 'required|string|max:255';
+        }
+
+        $validator = Validator::make($request->all(), $rules);
 
         if ($validator->fails()) {
             return response()->json([
@@ -28,34 +41,51 @@ class SuporteApiController extends Controller
             ], 422);
         }
 
-        // Verifica se cliente tem assinatura (alta prioridade)
-        $temAssinatura = $this->clienteTemAssinatura($request->email);
-        $prioridade = $temAssinatura ? 'alta' : 'normal';
+        // Usa a prioridade enviada na requisição, ou 'normal' como padrão
+        $prioridade = $request->input('prioridade', 'normal');
 
-        // Busca ticket existente do mesmo email e assunto, ou cria novo
-        $ticket = Ticket::where('email', $request->email)
-            ->where('assunto', $request->assunto)
-            ->first();
+        // Se ticket_id foi enviado, busca o ticket existente
+        if ($request->has('ticket_id')) {
+            $ticket = Ticket::find($request->ticket_id);
+            
+            if (!$ticket) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Ticket não encontrado'
+                ], 404);
+            }
 
-        if (!$ticket) {
-            // Cria novo ticket se não existir
+            // Validação de segurança: verifica se o email corresponde (se foi enviado)
+            if ($request->has('email') && $ticket->email !== $request->email) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Acesso negado. Email não corresponde ao ticket.'
+                ], 403);
+            }
+
+            // Atualiza a prioridade se foi enviada na requisição
+            if ($request->has('prioridade')) {
+                $ticket->update(['prioridade' => $prioridade]);
+            }
+
+            // Usa o email do ticket existente
+            $email = $ticket->email;
+        } else {
+            // Cria novo ticket
             $ticket = Ticket::create([
                 'email' => $request->email,
                 'assunto' => $request->assunto,
                 'status' => 'aberto',
                 'prioridade' => $prioridade,
             ]);
-        } else {
-            // Se ticket já existe, atualiza prioridade se cliente tem assinatura
-            if ($temAssinatura && $ticket->prioridade !== 'alta') {
-                $ticket->update(['prioridade' => 'alta']);
-            }
+
+            $email = $request->email;
         }
 
         // Cria mensagem
         $message = Message::create([
             'ticket_id' => $ticket->id,
-            'sender_email' => $request->email,
+            'sender_email' => $email,
             'sender_type' => 'cliente',
             'message' => $request->mensagem,
             'sent_at' => now(),

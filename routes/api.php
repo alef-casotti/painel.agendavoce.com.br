@@ -19,8 +19,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-// Rotas de Suporte (API para clientes)
-Route::prefix('suporte')->group(function () {
+// Rotas de Suporte (API para clientes) - Requer token de autenticação
+Route::prefix('suporte')->middleware('suporte.token')->group(function () {
     // Cliente envia mensagem (cria ticket se não existir)
     Route::post('/mensagem', [SuporteApiController::class, 'enviarMensagem']);
     
