@@ -33,6 +33,21 @@
                 },
             },
         }
+        
+        // Função para mostrar a página quando tudo estiver carregado
+        function showPage() {
+            // Aguarda um frame para garantir que o Tailwind processou
+            requestAnimationFrame(function() {
+                document.body.classList.add('loaded');
+            });
+        }
+        
+        // Aguarda o carregamento completo da página
+        if (document.readyState === 'loading') {
+            window.addEventListener('load', showPage);
+        } else {
+            showPage();
+        }
     </script>
     <style>
         * {
@@ -42,6 +57,11 @@
         }
         body {
             letter-spacing: -0.011em;
+            opacity: 0;
+            transition: opacity 0.3s ease-in;
+        }
+        body.loaded {
+            opacity: 1;
         }
         .input-field {
             width: 100%;
@@ -102,6 +122,7 @@
             font-weight: 700;
             letter-spacing: -0.015em;
             line-height: 1.2;
+            color: #2563eb;
         }
         .login-title {
             letter-spacing: -0.02em;
