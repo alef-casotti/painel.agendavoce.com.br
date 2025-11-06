@@ -9,11 +9,22 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- Tailwind CSS CDN -->
     <script>
         console.log('Script iniciado - tentando carregar Tailwind...');
+        
+        // Função para mostrar a página quando tudo estiver carregado
+        function showPage() {
+            // Aguarda alguns frames para garantir que Tailwind e Alpine processaram tudo
+            requestAnimationFrame(function() {
+                requestAnimationFrame(function() {
+                    document.body.classList.add('loaded');
+                });
+            });
+        }
+        
         var tailwindScript = document.createElement('script');
         tailwindScript.src = 'https://cdn.tailwindcss.com';
         tailwindScript.onload = function() {
@@ -49,6 +60,17 @@
             console.error('ERRO: Falha ao carregar Tailwind CDN');
         };
         document.head.appendChild(tailwindScript);
+        
+        // Aguarda o carregamento completo da página e recursos
+        if (document.readyState === 'loading') {
+            window.addEventListener('load', function() {
+                // Aguarda um pouco mais para garantir que Alpine.js inicializou
+                setTimeout(showPage, 200);
+            });
+        } else {
+            // Se já estiver carregado, aguarda um pouco e mostra
+            setTimeout(showPage, 200);
+        }
     </script>
     
     <!-- Estilos customizados -->
@@ -56,6 +78,13 @@
         * {
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
+        }
+        body {
+            opacity: 0;
+            transition: opacity 0.3s ease-in;
+        }
+        body.loaded {
+            opacity: 1;
         }
         .logo-agenda-voce {
             font-family: 'Source Sans Pro', sans-serif;
@@ -105,21 +134,17 @@
         .sidebar-link {
             position: relative;
             transition: all 0.2s ease;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         }
-        .sidebar-link::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 3px;
-            height: 0;
-            background: #2563eb;
-            border-radius: 0 2px 2px 0;
-            transition: height 0.2s ease;
+        .sidebar-link span {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-weight: 500;
+            font-size: 14px;
+            letter-spacing: -0.01em;
+            line-height: 1.4;
         }
-        .sidebar-link.active::before {
-            height: 60%;
+        .sidebar-link.active {
+            transform: translateX(2px);
         }
         /* Alpine.js fallback para dropdown */
         [x-cloak] { display: none !important; }
