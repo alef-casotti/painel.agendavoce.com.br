@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\FinanceiroController;
+use App\Http\Controllers\PagamentoController;
 use App\Http\Controllers\SuporteController;
 use App\Http\Controllers\BuscaController;
 use App\Http\Controllers\ProfileController;
@@ -47,6 +48,7 @@ Route::middleware(['auth'])->group(function () {
     // Área Financeiro (admin e financeiro)
     Route::middleware(['role:admin,financeiro'])->prefix('financeiro')->name('financeiro.')->group(function () {
         Route::get('/', [FinanceiroController::class, 'index'])->name('index');
+        Route::resource('pagamentos', PagamentoController::class);
     });
 
     // Área Suporte (admin e suporte)
