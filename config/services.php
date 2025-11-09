@@ -35,4 +35,9 @@ return [
         'api_token' => env('SUPORTE_API_TOKEN'),
     ],
 
+    'financeiro' => [
+        'base_url' => env('API_AGENDA_VOCE_URL'),
+        'api_key' => env('API_AGENDA_VOCE_KEY'),
+    ],
+
 ];

@@ -8,11 +8,76 @@
     <!-- Main Content -->
     <main class="flex-1 ml-64 mt-16 overflow-y-auto">
         <div class="p-8">
+            @php
+                $isFinanceUser = $user->isAdmin() || $user->isFinanceiro();
+                $monthNames = [
+                    '01' => 'Janeiro',
+                    '02' => 'Fevereiro',
+                    '03' => 'Março',
+                    '04' => 'Abril',
+                    '05' => 'Maio',
+                    '06' => 'Junho',
+                    '07' => 'Julho',
+                    '08' => 'Agosto',
+                    '09' => 'Setembro',
+                    '10' => 'Outubro',
+                    '11' => 'Novembro',
+                    '12' => 'Dezembro',
+                ];
+
+                $healthHighlights = $financeMetricsHighlights['health'] ?? [];
+                $growthHighlights = $financeMetricsHighlights['growth'] ?? [];
+                $acquisitionHighlights = $financeMetricsHighlights['acquisition'] ?? [];
+            @endphp
+
             <!-- Page Header -->
             <div class="mb-8">
-                <div>
-                    <h1 class="text-3xl font-bold text-gray-900 mb-2">Dashboard</h1>
-                    <p class="text-gray-600">Bem-vindo ao seu painel de controle</p>
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900 mb-2">Dashboard</h1>
+                        <p class="text-gray-600">Bem-vindo ao seu painel de controle</p>
+                    </div>
+
+                    @if($isFinanceUser)
+                        <div class="card p-4 md:min-w-[540px]">
+                            <form method="GET" action="{{ route('dashboard') }}" class="flex flex-col gap-4 md:flex-row md:items-end">
+                                <div class="flex-1">
+                                    <label for="filtro_mes" class="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">Mês</label>
+                                    <select id="filtro_mes" name="filtro_mes"
+                                            class="w-full rounded-lg border-gray-300 focus:border-yellow-400 focus:ring focus:ring-yellow-200 focus:ring-opacity-50">
+                                        @foreach($monthNames as $value => $label)
+                                            <option value="{{ $value }}" {{ (int) $selectedFilterMonth === (int) $value ? 'selected' : '' }}>
+                                                {{ $label }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <div class="flex-1">
+                                    <label for="filtro_ano" class="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">Ano</label>
+                                    <select id="filtro_ano" name="filtro_ano"
+                                            class="w-full rounded-lg border-gray-300 focus:border-yellow-400 focus:ring focus:ring-yellow-200 focus:ring-opacity-50">
+                                        @for($year = now()->year; $year >= now()->year - 5; $year--)
+                                            <option value="{{ $year }}" {{ (int) $selectedFilterYear === (int) $year ? 'selected' : '' }}>
+                                                {{ $year }}
+                                            </option>
+                                        @endfor
+                                    </select>
+                                </div>
+
+                                <div class="flex items-center gap-3 md:gap-4">
+                                    <button type="submit"
+                                            class="inline-flex items-center px-4 py-2 bg-yellow-500 text-white text-sm font-semibold rounded-lg hover:bg-yellow-600 transition-colors whitespace-nowrap">
+                                        Aplicar Filtro
+                                    </button>
+                                    <a href="{{ route('dashboard') }}"
+                                       class="text-xs text-gray-500 hover:text-gray-700 font-medium underline whitespace-nowrap">
+                                        Limpar
+                                    </a>
+                                </div>
+                            </form>
+                        </div>
+                    @endif
                 </div>
             </div>
 
@@ -29,8 +94,14 @@
                 </div>
             @endif
 
+            @if($financeMetricsError)
+                <div class="mb-6 p-4 bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-lg">
+                    {{ $financeMetricsError }}
+                </div>
+            @endif
+
             <!-- Stats Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-{{ $isFinanceUser ? '4' : '3' }} gap-6 mb-8">
                 <div class="card p-6 group hover:scale-105 transition-transform">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center">
@@ -78,7 +149,389 @@
                         </div>
                     </div>
                 </div>
+
+                @if($isFinanceUser)
+                    <div class="card p-6">
+                        <div class="flex items-center">
+                            <div class="p-3 bg-gradient-to-br from-yellow-100 to-yellow-200 rounded-xl">
+                                <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                </svg>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-gray-500 text-sm font-medium">Período de Referência</p>
+                                <p class="text-gray-900 font-bold text-sm mt-1">{{ $dashboardPeriodLabel }}</p>
+                            </div>
+                        </div>
+                    </div>
+                @endif
             </div>
+
+            @if(($user->isAdmin() || $user->isFinanceiro()) && $financeMetrics)
+            <div class="card p-8 mb-8">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-900 mb-1">Resumo Financeiro</h2>
+                        <p class="text-gray-600 text-sm">Principais indicadores financeiros do período</p>
+                    </div>
+                </div>
+
+                @if(!empty($healthHighlights))
+                    <section class="mb-10">
+                        <div class="mb-4">
+                            <h3 class="text-lg font-semibold text-gray-900">🚨 1. Métricas de Saúde Financeira</h3>
+                            <p class="text-sm text-gray-500 mt-1">Saúde do caixa, lucratividade e capacidade de sustentar a operação.</p>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                            @if(!empty($healthHighlights['mrr']))
+                                @php
+                                    $card = $healthHighlights['mrr'];
+                                    $style = $card['style'] ?? 'neutral';
+                                    $isNegative = $style === 'negative';
+                                    $containerClasses = $isNegative
+                                        ? 'bg-gradient-to-br from-red-50 to-red-100 border border-red-200'
+                                        : 'bg-gradient-to-br from-green-50 to-green-100 border border-green-200';
+                                    $labelClasses = $isNegative ? 'text-red-600' : 'text-green-600';
+                                    $metaLabelClasses = $isNegative ? 'text-red-700' : 'text-green-700';
+                                    $metaValueClasses = $isNegative ? 'text-red-800' : 'text-green-800';
+                                @endphp
+                                <div class="{{ $containerClasses }} p-6 rounded-xl">
+                                    <span class="{{ $labelClasses }} text-sm font-medium">{{ $card['label'] }}</span>
+                                    <p class="text-gray-600 text-xs mt-2 leading-relaxed">{{ $card['description'] }}</p>
+                                    <p class="text-3xl font-bold text-gray-900 mt-4">{{ $card['value'] }}</p>
+                                    @if(!empty($card['meta']))
+                                        <div class="mt-4 p-3 bg-white bg-opacity-60 border {{ $isNegative ? 'border-red-200' : 'border-green-200' }} rounded-lg">
+                                            <div class="flex items-center justify-between">
+                                                <span class="text-xs font-semibold {{ $metaLabelClasses }}">{{ $card['meta']['label'] }}</span>
+                                                <span class="text-sm font-bold {{ $metaValueClasses }}">{{ $card['meta']['value'] }}</span>
+                                            </div>
+                                            @if(!empty($card['meta']['hint']))
+                                                <p class="text-xs text-gray-600 mt-2">{{ $card['meta']['hint'] }}</p>
+                                            @endif
+                                        </div>
+                                    @endif
+                                </div>
+                            @endif
+
+                            @if(!empty($healthHighlights['churn']))
+                                @php
+                                    $card = $healthHighlights['churn'];
+                                    $style = $card['style'] ?? 'neutral';
+                                    $isNegative = $style === 'negative';
+                                    $containerClasses = $isNegative
+                                        ? 'bg-gradient-to-br from-red-50 to-red-100 border border-red-200'
+                                        : 'bg-gradient-to-br from-green-50 to-green-100 border border-green-200';
+                                    $labelClasses = $isNegative ? 'text-red-600' : 'text-green-600';
+                                    $metaLabelClasses = $isNegative ? 'text-red-700' : 'text-green-700';
+                                    $metaValueClasses = $isNegative ? 'text-red-800' : 'text-green-800';
+                                @endphp
+                                <div class="{{ $containerClasses }} p-6 rounded-xl">
+                                    <span class="{{ $labelClasses }} text-sm font-medium">{{ $card['label'] }}</span>
+                                    <p class="text-gray-600 text-xs mt-2 leading-relaxed">{{ $card['description'] }}</p>
+                                    <p class="text-3xl font-bold text-gray-900 mt-4">{{ $card['value'] }}</p>
+                                    @if(!empty($card['meta']))
+                                        <div class="mt-4 p-3 bg-white bg-opacity-60 border {{ $isNegative ? 'border-red-200' : 'border-green-200' }} rounded-lg">
+                                            <div class="flex items-center justify-between">
+                                                <span class="text-xs font-semibold {{ $metaLabelClasses }}">{{ $card['meta']['label'] }}</span>
+                                                <span class="text-sm font-bold {{ $metaValueClasses }}">{{ $card['meta']['value'] }}</span>
+                                            </div>
+                                            @if(!empty($card['meta']['hint']))
+                                                <p class="text-xs text-gray-600 mt-2">{{ $card['meta']['hint'] }}</p>
+                                            @endif
+                                        </div>
+                                    @endif
+                                </div>
+                            @endif
+
+                            @if(!empty($healthHighlights['burn_rate']))
+                                @php
+                                    $card = $healthHighlights['burn_rate'];
+                                    $style = $card['style'] ?? 'neutral';
+                                    $isNegative = $style === 'negative';
+                                    $containerClasses = $isNegative
+                                        ? 'bg-gradient-to-br from-red-50 to-red-100 border border-red-200'
+                                        : 'bg-gradient-to-br from-green-50 to-green-100 border border-green-200';
+                                    $labelClasses = $isNegative ? 'text-red-600' : 'text-green-600';
+                                    $metaLabelClasses = $isNegative ? 'text-red-700' : 'text-green-700';
+                                    $metaValueClasses = $isNegative ? 'text-red-800' : 'text-green-800';
+                                @endphp
+                                <div class="{{ $containerClasses }} p-6 rounded-xl">
+                                    <span class="{{ $labelClasses }} text-sm font-medium">{{ $card['label'] }}</span>
+                                    <p class="text-gray-600 text-xs mt-2 leading-relaxed">{{ $card['description'] }}</p>
+                                    <p class="text-3xl font-bold text-gray-900 mt-4">{{ $card['value'] }}</p>
+                                    @if(!empty($card['meta']))
+                                        <div class="mt-4 p-3 bg-white bg-opacity-60 border {{ $isNegative ? 'border-red-200' : 'border-green-200' }} rounded-lg">
+                                            <div class="flex items-center justify-between">
+                                                <span class="text-xs font-semibold {{ $metaLabelClasses }}">{{ $card['meta']['label'] }}</span>
+                                                <span class="text-sm font-bold {{ $metaValueClasses }}">{{ $card['meta']['value'] }}</span>
+                                            </div>
+                                            @if(!empty($card['meta']['hint']))
+                                                <p class="text-xs text-gray-600 mt-2">{{ $card['meta']['hint'] }}</p>
+                                            @endif
+                                        </div>
+                                    @endif
+                                </div>
+                            @endif
+
+                            @if(!empty($healthHighlights['receita_liquida']))
+                                @php
+                                    $card = $healthHighlights['receita_liquida'];
+                                    $style = $card['style'] ?? 'neutral';
+                                    $isNegative = $style === 'negative';
+                                    $containerClasses = $isNegative
+                                        ? 'bg-gradient-to-br from-red-50 to-red-100 border border-red-200'
+                                        : 'bg-gradient-to-br from-green-50 to-green-100 border border-green-200';
+                                    $labelClasses = $isNegative ? 'text-red-600' : 'text-green-600';
+                                    $metaLabelClasses = $isNegative ? 'text-red-700' : 'text-green-700';
+                                    $metaValueClasses = $isNegative ? 'text-red-800' : 'text-green-800';
+                                @endphp
+                                <div class="{{ $containerClasses }} p-6 rounded-xl">
+                                    <span class="{{ $labelClasses }} text-sm font-medium">{{ $card['label'] }}</span>
+                                    <p class="text-gray-600 text-xs mt-2 leading-relaxed">{{ $card['description'] }}</p>
+                                    <p class="text-3xl font-bold text-gray-900 mt-4">{{ $card['value'] }}</p>
+                                    @if(!empty($card['meta']))
+                                        <div class="mt-4 p-3 bg-white bg-opacity-60 border {{ $isNegative ? 'border-red-200' : 'border-green-200' }} rounded-lg">
+                                            <div class="flex items-center justify-between">
+                                                <span class="text-xs font-semibold {{ $metaLabelClasses }}">{{ $card['meta']['label'] ?? '' }}</span>
+                                                <span class="text-sm font-bold {{ $metaValueClasses }}">{{ $card['meta']['value'] ?? '' }}</span>
+                                            </div>
+                                            @if(!empty($card['meta']['hint']))
+                                                <p class="text-xs text-gray-600 mt-2">{{ $card['meta']['hint'] }}</p>
+                                            @endif
+                                        </div>
+                                    @endif
+                                </div>
+                            @endif
+
+                            @if(!empty($healthHighlights['expenses_total']))
+                                @php
+                                    $card = $healthHighlights['expenses_total'];
+                                    $style = $card['style'] ?? 'neutral';
+                                    $isNegative = $style === 'negative';
+                                    $containerClasses = $isNegative
+                                        ? 'bg-gradient-to-br from-red-50 to-red-100 border border-red-200'
+                                        : 'bg-gradient-to-br from-green-50 to-green-100 border border-green-200';
+                                    $labelClasses = $isNegative ? 'text-red-600' : 'text-green-600';
+                                    $metaLabelClasses = $isNegative ? 'text-red-700' : 'text-green-700';
+                                    $metaValueClasses = $isNegative ? 'text-red-800' : 'text-green-800';
+                                @endphp
+                                <div class="{{ $containerClasses }} p-6 rounded-xl">
+                                    <span class="{{ $labelClasses }} text-sm font-medium">{{ $card['label'] }}</span>
+                                    <p class="text-gray-600 text-xs mt-2 leading-relaxed">{{ $card['description'] }}</p>
+                                    <p class="text-3xl font-bold text-gray-900 mt-4">{{ $card['value'] }}</p>
+                                    @if(!empty($card['meta']))
+                                        <div class="mt-4 p-3 bg-white bg-opacity-60 border {{ $isNegative ? 'border-red-200' : 'border-green-200' }} rounded-lg">
+                                            <div class="flex items-center justify-between">
+                                                <span class="text-xs font-semibold {{ $metaLabelClasses }}">{{ $card['meta']['label'] }}</span>
+                                                <span class="text-sm font-bold {{ $metaValueClasses }}">{{ $card['meta']['value'] }}</span>
+                                            </div>
+                                            @if(!empty($card['meta']['hint']))
+                                                <p class="text-xs text-gray-600 mt-2">{{ $card['meta']['hint'] }}</p>
+                                            @endif
+                                        </div>
+                                    @endif
+                                </div>
+                            @endif
+
+                            @if(!empty($healthHighlights['net_profit']))
+                                @php
+                                    $card = $healthHighlights['net_profit'];
+                                    $style = $card['style'] ?? 'neutral';
+                                    $isNegative = $style === 'negative';
+                                    $containerClasses = $isNegative
+                                        ? 'bg-gradient-to-br from-red-50 via-red-100 to-white border border-red-200'
+                                        : 'bg-gradient-to-br from-blue-50 via-blue-100 to-white border border-blue-200';
+                                    $labelClasses = $isNegative ? 'text-red-600' : 'text-blue-600';
+                                    $iconClasses = $isNegative ? 'text-red-200' : 'text-blue-200';
+                                @endphp
+                                <div class="{{ $containerClasses }} p-6 rounded-xl shadow-sm">
+                                    <div class="flex items-center justify-between mb-4">
+                                        <span class="{{ $labelClasses }} text-sm font-semibold uppercase tracking-wide">
+                                            {{ $card['label'] }}
+                                        </span>
+                                        <svg class="w-5 h-5 {{ $iconClasses }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
+                                    </div>
+                                    <p class="text-xs text-gray-600 leading-relaxed">{{ $card['description'] }}</p>
+                                    <p class="text-4xl font-extrabold mt-5 text-gray-900">
+                                        {{ $card['value'] }}
+                                    </p>
+                                </div>
+                            @endif
+                        </div>
+                    </section>
+                @endif
+
+                @if(!empty($growthHighlights))
+                    <section class="mb-10">
+                        <div class="mb-4">
+                            <h3 class="text-lg font-semibold text-gray-900">🚀 2. Métricas de Crescimento e Retenção</h3>
+                            <p class="text-sm text-gray-500 mt-1">Acompanhe expansão da base, retenção e poder recorrente.</p>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                            @if(!empty($growthHighlights['clientes_ativos']))
+                                @php
+                                    $card = $growthHighlights['clientes_ativos'];
+                                    $style = $card['style'] ?? 'neutral';
+                                    $isNegative = $style === 'negative';
+                                    $containerClasses = $isNegative
+                                        ? 'bg-gradient-to-br from-red-50 to-red-100 border border-red-200'
+                                        : 'bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200';
+                                    $labelClasses = $isNegative ? 'text-red-600' : 'text-orange-600';
+                                    $metaLabelClasses = $isNegative ? 'text-red-700' : 'text-orange-700';
+                                    $metaValueClasses = $isNegative ? 'text-red-800' : 'text-orange-800';
+                                @endphp
+                                <div class="{{ $containerClasses }} p-6 rounded-xl">
+                                    <span class="{{ $labelClasses }} text-sm font-medium">{{ $card['label'] }}</span>
+                                    <p class="text-gray-600 text-xs mt-2 leading-relaxed">{{ $card['description'] }}</p>
+                                    <p class="text-3xl font-bold text-gray-900 mt-4">{{ $card['value'] }}</p>
+                                    @if(!empty($card['meta']))
+                                        <div class="mt-4 p-3 bg-white bg-opacity-60 border {{ $isNegative ? 'border-red-200' : 'border-green-200' }} rounded-lg">
+                                            <div class="flex items-center justify-between">
+                                                <span class="text-xs font-semibold {{ $metaLabelClasses }}">{{ $card['meta']['label'] }}</span>
+                                                <span class="text-sm font-bold {{ $metaValueClasses }}">{{ $card['meta']['value'] }}</span>
+                                            </div>
+                                            @if(!empty($card['meta']['hint']))
+                                                <p class="text-xs text-gray-600 mt-2">{{ $card['meta']['hint'] }}</p>
+                                            @endif
+                                        </div>
+                                    @endif
+                                </div>
+                            @endif
+
+                            @if(!empty($growthHighlights['arpu']))
+                                @php
+                                    $card = $growthHighlights['arpu'];
+                                    $style = $card['style'] ?? 'neutral';
+                                    $isNegative = $style === 'negative';
+                                    $containerClasses = $isNegative
+                                        ? 'bg-gradient-to-br from-red-50 to-red-100 border border-red-200'
+                                        : 'bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200';
+                                    $labelClasses = $isNegative ? 'text-red-600' : 'text-orange-600';
+                                    $metaLabelClasses = $isNegative ? 'text-red-700' : 'text-orange-700';
+                                    $metaValueClasses = $isNegative ? 'text-red-800' : 'text-orange-800';
+                                @endphp
+                                <div class="{{ $containerClasses }} p-6 rounded-xl">
+                                    <span class="{{ $labelClasses }} text-sm font-medium">{{ $card['label'] }}</span>
+                                    <p class="text-gray-600 text-xs mt-2 leading-relaxed">{{ $card['description'] }}</p>
+                                    <p class="text-3xl font-bold text-gray-900 mt-4">{{ $card['value'] }}</p>
+                                    @if(!empty($card['meta']))
+                                        <div class="mt-4 p-3 bg-white bg-opacity-60 border {{ $isNegative ? 'border-red-200' : 'border-green-200' }} rounded-lg">
+                                            <div class="flex items-center justify-between">
+                                                <span class="text-xs font-semibold {{ $metaLabelClasses }}">{{ $card['meta']['label'] }}</span>
+                                                <span class="text-sm font-bold {{ $metaValueClasses }}">{{ $card['meta']['value'] }}</span>
+                                            </div>
+                                            @if(!empty($card['meta']['hint']))
+                                                <p class="text-xs text-gray-600 mt-2">{{ $card['meta']['hint'] }}</p>
+                                            @endif
+                                        </div>
+                                    @endif
+                                </div>
+                            @endif
+                        </div>
+                    </section>
+                @endif
+
+                <section class="mb-10">
+                    <div class="mb-4">
+                        <h3 class="text-lg font-semibold text-gray-900">💵 3. Métricas de Aquisição e Marketing</h3>
+                        <p class="text-sm text-gray-500 mt-1">Indicadores que medem investimento em marketing e geração de novas oportunidades.</p>
+                    </div>
+
+                    @if(!empty($acquisitionHighlights))
+                        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                            @if(!empty($acquisitionHighlights['novos_clientes']))
+                                @php
+                                    $card = $acquisitionHighlights['novos_clientes'];
+                                    $style = $card['style'] ?? 'neutral';
+                                    $isNegative = $style === 'negative';
+                                    $containerClasses = $isNegative
+                                        ? 'bg-gradient-to-br from-red-50 to-red-100 border border-red-200'
+                                        : 'bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200';
+                                    $labelClasses = $isNegative ? 'text-red-600' : 'text-purple-600';
+                                @endphp
+                                <div class="{{ $containerClasses }} p-6 rounded-xl">
+                                    <span class="{{ $labelClasses }} text-sm font-medium">{{ $card['label'] }}</span>
+                                    <p class="text-gray-600 text-xs mt-2 leading-relaxed">{{ $card['description'] ?? '' }}</p>
+                                    <p class="text-3xl font-bold text-gray-900 mt-4">{{ $card['value'] }}</p>
+                                </div>
+                            @endif
+
+                            @if(!empty($acquisitionHighlights['cac']))
+                                @php
+                                    $card = $acquisitionHighlights['cac'];
+                                    $style = $card['style'] ?? 'neutral';
+                                    $isNegative = $style === 'negative';
+                                    $containerClasses = $isNegative
+                                        ? 'bg-gradient-to-br from-red-50 to-red-100 border border-red-200'
+                                        : 'bg-gradient-to-br from-purple-100 via-purple-200 to-white border border-purple-300';
+                                    $labelClasses = $isNegative ? 'text-red-600' : 'text-purple-700';
+                                    $metaLabelClasses = $isNegative ? 'text-red-700' : 'text-purple-700';
+                                    $metaValueClasses = $isNegative ? 'text-red-800' : 'text-purple-800';
+                                @endphp
+                                <div class="{{ $containerClasses }} p-6 rounded-xl">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <span class="{{ $labelClasses }} text-sm font-semibold uppercase tracking-wide">{{ $card['label'] }}</span>
+                                        <svg class="w-5 h-5 {{ $isNegative ? 'text-red-200' : 'text-purple-300' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
+                                    </div>
+                                    <p class="text-gray-600 text-xs leading-relaxed">{{ $card['description'] ?? '' }}</p>
+                                    <p class="text-3xl font-bold text-gray-900 mt-4">{{ $card['value'] }}</p>
+                                    @if(!empty($card['meta']))
+                                        <div class="mt-4 p-3 bg-white bg-opacity-70 border {{ $isNegative ? 'border-red-200' : 'border-purple-200' }} rounded-lg">
+                                            <div class="flex items-center justify-between">
+                                                <span class="text-xs font-semibold {{ $metaLabelClasses }}">{{ $card['meta']['label'] }}</span>
+                                                <span class="text-sm font-bold {{ $metaValueClasses }}">{{ $card['meta']['value'] }}</span>
+                                            </div>
+                                            @if(!empty($card['meta']['hint']))
+                                                <p class="text-xs text-gray-600 mt-2">{{ $card['meta']['hint'] }}</p>
+                                            @endif
+                                        </div>
+                                    @endif
+                                </div>
+                            @endif
+
+                            @if(!empty($acquisitionHighlights['trial_conversion']))
+                                @php
+                                    $card = $acquisitionHighlights['trial_conversion'];
+                                    $style = $card['style'] ?? 'neutral';
+                                    $isNegative = $style === 'negative';
+                                    $containerClasses = $isNegative
+                                        ? 'bg-gradient-to-br from-red-50 to-red-100 border border-red-200'
+                                        : 'bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200';
+                                    $labelClasses = $isNegative ? 'text-red-600' : 'text-purple-600';
+                                    $metaLabelClasses = $isNegative ? 'text-red-700' : 'text-purple-700';
+                                    $metaValueClasses = $isNegative ? 'text-red-800' : 'text-purple-800';
+                                @endphp
+                                <div class="{{ $containerClasses }} p-6 rounded-xl">
+                                    <span class="{{ $labelClasses }} text-sm font-medium">{{ $card['label'] }}</span>
+                                    <p class="text-gray-600 text-xs mt-2 leading-relaxed">{{ $card['description'] ?? '' }}</p>
+                                    <p class="text-3xl font-bold text-gray-900 mt-4">{{ $card['value'] }}</p>
+                                    @if(!empty($card['meta']))
+                                        <div class="mt-4 p-3 bg-white bg-opacity-60 border {{ $isNegative ? 'border-red-200' : 'border-purple-200' }} rounded-lg">
+                                            <div class="flex items-center justify-between">
+                                                <span class="text-xs font-semibold {{ $metaLabelClasses }}">{{ $card['meta']['label'] }}</span>
+                                                <span class="text-sm font-bold {{ $metaValueClasses }}">{{ $card['meta']['value'] }}</span>
+                                            </div>
+                                            @if(!empty($card['meta']['hint']))
+                                                <p class="text-xs text-gray-600 mt-2">{{ $card['meta']['hint'] }}</p>
+                                            @endif
+                                        </div>
+                                    @endif
+                                </div>
+                            @endif
+                        </div>
+                    @else
+                        <div class="p-6 rounded-xl border border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100 text-sm text-blue-700">
+                            Ainda não há métricas cadastradas para aquisição e marketing neste período. Conecte suas fontes de marketing ou registre investimentos para acompanhar estes indicadores.
+                        </div>
+                    @endif
+                </section>
+
+            </div>
+            @endif
 
             <!-- Estatísticas de Atendimento (Apenas Admin) -->
             @if($user->isAdmin() && $estatisticas)
@@ -259,20 +712,20 @@
                     @endif
 
                     @if($user->isAdmin())
-                        <a href="{{ route('admin.index') }}" 
+                        <a href="{{ route('admin.users.index') }}" 
                            class="card p-6 border-2 border-transparent hover:border-red-200 hover:shadow-lg transition-all group">
                             <div class="flex items-start justify-between mb-4">
                                 <div class="p-3 bg-gradient-to-br from-red-100 to-red-200 rounded-xl group-hover:from-red-200 group-hover:to-red-300 transition-colors">
                                     <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
                                     </svg>
                                 </div>
                                 <svg class="w-5 h-5 text-gray-400 group-hover:text-red-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                                 </svg>
                             </div>
-                            <h3 class="text-lg font-bold text-gray-900 mb-2">Administração</h3>
-                            <p class="text-gray-600 text-sm mb-4 leading-relaxed">Acesso completo a todas as áreas do sistema</p>
+                            <h3 class="text-lg font-bold text-gray-900 mb-2">Usuários</h3>
+                            <p class="text-gray-600 text-sm mb-4 leading-relaxed">Gerencie os usuários e seus acessos no sistema</p>
                             <span class="text-red-600 text-sm font-semibold group-hover:underline inline-flex items-center">
                                 Acessar
                                 <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
