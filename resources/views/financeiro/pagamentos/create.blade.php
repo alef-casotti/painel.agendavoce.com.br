@@ -7,15 +7,15 @@
     <x-sidebar />
     <x-header />
 
-    <main class="flex-1 ml-64 mt-16 overflow-y-auto">
-        <div class="p-8 space-y-6">
-            <div class="flex items-center justify-between">
+    <main class="flex-1 lg:ml-3 mt-16 overflow-y-auto">
+        <div class="p-4 lg:p-8 space-y-6">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div>
                     <h1 class="text-3xl font-bold text-gray-900">Novo pagamento</h1>
                     <p class="text-gray-600">Cadastre uma nova despesa ou saída financeira.</p>
                 </div>
 
-                <a href="{{ route('financeiro.pagamentos.index') }}" class="inline-flex items-center px-4 py-2 border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 transition">
+                <a href="{{ route('financeiro.pagamentos.index') }}" class="inline-flex items-center px-4 py-2 border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 transition w-full md:w-auto justify-center md:justify-start">
                     Voltar para lista
                 </a>
             </div>

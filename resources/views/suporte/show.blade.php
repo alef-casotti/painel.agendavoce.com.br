@@ -6,8 +6,8 @@
     <x-header />
 
     <!-- Main Content -->
-    <main class="flex-1 ml-64 mt-16 overflow-y-auto">
-        <div class="p-8">
+    <main class="flex-1 lg:ml-3 mt-16 overflow-y-auto">
+        <div class="p-4 lg:p-8">
             
             <!-- Breadcrumb -->
             <nav class="mb-6">
@@ -43,20 +43,25 @@
 
             <!-- Ticket Header Card -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 mb-6 overflow-hidden">
-                <div class="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-4">
-                            <div class="bg-white/20 backdrop-blur-sm rounded-lg p-3">
-                                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="bg-gradient-to-r from-blue-600 to-blue-700 px-4 sm:px-6 py-4 sm:py-5">
+                    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                        <div class="flex items-center space-x-3 sm:space-x-4 flex-1 min-w-0">
+                            <div class="bg-white/20 backdrop-blur-sm rounded-lg p-2 sm:p-3 flex-shrink-0">
+                                <svg class="w-6 h-6 sm:w-8 sm:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                                 </svg>
                             </div>
-                            <div>
-                                <h1 class="text-2xl font-bold text-white">Ticket #{{ $ticket->id }}</h1>
-                                <p class="text-blue-100 text-sm mt-1">{{ $ticket->assunto }}</p>
+                            <div class="min-w-0 flex-1">
+                                <div class="flex items-center space-x-2 sm:space-x-3 flex-wrap">
+                                    <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-white">
+                                        <span class="text-blue-200 font-normal">Ticket</span> 
+                                        <span class="text-white">#{{ str_pad($ticket->id, 6, '0', STR_PAD_LEFT) }}</span>
+                                    </h1>
+                                </div>
+                                <p class="text-blue-100 text-xs sm:text-sm mt-1 truncate">{{ $ticket->assunto }}</p>
                             </div>
                         </div>
-                        <div class="flex items-center space-x-3">
+                        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 flex-shrink-0">
                             @php
                                 $statusColors = [
                                     'aberto' => 'bg-green-500',
@@ -73,13 +78,13 @@
                                 $color = $statusColors[$ticket->status] ?? 'bg-gray-500';
                                 $label = $statusLabels[$ticket->status] ?? $ticket->status;
                             @endphp
-                            <span class="px-4 py-2 bg-white/20 backdrop-blur-sm text-white text-sm font-semibold rounded-lg border border-white/30">
+                            <span class="px-3 sm:px-4 py-2 bg-white/20 backdrop-blur-sm text-white text-xs sm:text-sm font-semibold rounded-lg border border-white/30 text-center whitespace-nowrap">
                                 {{ $label }}
                             </span>
                             @if($ticket->status !== 'fechado')
-                                <form method="POST" action="{{ route('suporte.fechar', $ticket->id) }}" class="inline" id="fecharTicketForm" onsubmit="return confirmarFechamento(event);">
+                                <form method="POST" action="{{ route('suporte.fechar', $ticket->id) }}" class="inline w-full sm:w-auto" id="fecharTicketForm" onsubmit="return confirmarFechamento(event);">
                                     @csrf
-                                    <button type="submit" class="px-4 py-2 bg-white text-blue-700 rounded-lg hover:bg-blue-50 text-sm font-semibold transition-colors shadow-sm">
+                                    <button type="submit" class="w-full sm:w-auto px-4 py-2 bg-white text-blue-700 rounded-lg hover:bg-blue-50 text-sm font-semibold transition-colors shadow-sm whitespace-nowrap">
                                         Fechar Ticket
                                     </button>
                                 </form>

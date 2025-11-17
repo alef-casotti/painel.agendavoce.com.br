@@ -6,15 +6,15 @@
     <x-header />
 
     <!-- Main Content -->
-    <main class="flex-1 ml-64 mt-16 overflow-y-auto">
-        <div class="p-8">
+    <main class="flex-1 lg:ml-3 mt-16 overflow-y-auto">
+        <div class="p-4 lg:p-8">
             <!-- Page Header -->
-            <div class="mb-8 flex justify-between items-center">
+            <div class="mb-8 flex flex-col md:flex-row md:justify-between md:items-center gap-4">
                 <div>
                     <h1 class="text-3xl font-bold text-gray-900 mb-2">Gerenciamento de Usuários</h1>
                     <p class="text-gray-600">Gerencie todos os usuários do sistema</p>
                 </div>
-                <a href="{{ route('admin.users.create') }}" class="btn-primary">
+                <a href="{{ route('admin.users.create') }}" class="btn-primary w-full md:w-auto">
                     <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                     </svg>

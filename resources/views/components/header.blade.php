@@ -2,10 +2,22 @@
     $user = auth()->user();
 @endphp
 
-<header class="fixed top-0 left-64 right-0 h-16 bg-white border-b border-gray-200 shadow-sm z-40">
-    <div class="h-full px-6 flex items-center justify-between">
-        <!-- Left Side - Search and Navigation -->
-        <div class="flex items-center space-x-4 flex-1">
+<header class="fixed top-0 left-0 lg:left-64 right-0 h-16 bg-white border-b border-gray-200 shadow-sm z-40">
+    <div class="h-full px-4 lg:px-6 flex items-center justify-between">
+        <!-- Left Side - Hamburger Menu (Mobile) and Search -->
+        <div class="flex items-center space-x-2 lg:space-x-4 flex-1">
+            <!-- Hamburger Menu Button (Mobile only) -->
+            <button 
+                onclick="if(window.openSidebar) window.openSidebar(); else console.error('openSidebar não está definido');"
+                class="lg:hidden p-2 text-gray-500 hover:text-gray-700 rounded-lg hover:bg-gray-100 transition-colors"
+                aria-label="Abrir menu"
+                type="button"
+            >
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+            
             <!-- Search Bar -->
             <div class="relative flex-1 max-w-md">
                 <form method="GET" action="{{ route('busca.index') }}" class="w-full">
@@ -25,7 +37,7 @@
             </div>
 
             <!-- Quick Actions -->
-            <div class="flex items-center space-x-2">
+            <div class="flex items-center space-x-1 lg:space-x-2">
                 <!-- Notifications - Escondido por enquanto -->
                 {{-- <button class="relative p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
                     <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -56,9 +68,9 @@
         </div>
 
         <!-- Right Side - User Menu -->
-        <div class="flex items-center space-x-4">
+        <div class="flex items-center space-x-2 lg:space-x-4">
             <!-- Date -->
-            <div class="hidden md:flex items-center space-x-2 text-sm text-gray-600">
+            <div class="hidden lg:flex items-center space-x-2 text-sm text-gray-600">
                 <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                 </svg>
@@ -74,11 +86,11 @@
                     <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
                         <span class="text-white text-xs font-semibold">{{ strtoupper(substr($user->name, 0, 1)) }}</span>
                     </div>
-                    <div class="hidden md:block text-left">
+                    <div class="hidden lg:block text-left">
                         <p class="text-sm font-medium text-gray-900">{{ $user->name }}</p>
                         <p class="text-xs text-gray-500">{{ ucfirst($user->role) }}</p>
                     </div>
-                    <svg class="hidden md:block h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="hidden lg:block h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
