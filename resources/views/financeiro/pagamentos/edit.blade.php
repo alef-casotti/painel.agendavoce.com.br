@@ -7,8 +7,8 @@
     <x-sidebar />
     <x-header />
 
-    <main class="flex-1 ml-64 mt-16 overflow-y-auto">
-        <div class="p-8 space-y-6">
+    <main class="flex-1 lg:ml-3 mt-16 overflow-y-auto">
+        <div class="p-4 lg:p-8 space-y-6">
             <div class="flex items-center justify-between">
                 <div>
                     <h1 class="text-3xl font-bold text-gray-900">Editar pagamento</h1>
