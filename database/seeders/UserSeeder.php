@@ -21,21 +21,6 @@ class UserSeeder extends Seeder
             'password' => Hash::make('admin123'),
             'role' => 'admin',
         ]);
-
-        // Criar usuário Financeiro
-        User::create([
-            'name' => 'Financeiro',
-            'email' => 'financeiro@agendavoce.com.br',
-            'password' => Hash::make('financeiro123'),
-            'role' => 'financeiro',
-        ]);
-
-        // Criar usuário Suporte
-        User::create([
-            'name' => 'Suporte',
-            'email' => 'suporte@agendavoce.com.br',
-            'password' => Hash::make('suporte123'),
-            'role' => 'suporte',
-        ]);
+        
     }
 }
