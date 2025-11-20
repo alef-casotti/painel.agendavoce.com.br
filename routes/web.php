@@ -8,6 +8,7 @@ use App\Http\Controllers\FinanceiroController;
 use App\Http\Controllers\PagamentoController;
 use App\Http\Controllers\SuporteController;
 use App\Http\Controllers\BuscaController;
+use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
 
@@ -51,12 +52,18 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('pagamentos', PagamentoController::class);
     });
 
-    // Área Suporte (admin e suporte)
-    Route::middleware(['role:admin,suporte'])->prefix('suporte')->name('suporte.')->group(function () {
+    // Área Suporte (admin, suporte e customer success manager)
+    Route::middleware(['role:admin,suporte,customer_success_manager'])->prefix('suporte')->name('suporte.')->group(function () {
         Route::get('/', [SuporteController::class, 'index'])->name('index');
         Route::get('/ticket/{id}', [SuporteController::class, 'visualizar'])->name('visualizar');
         Route::post('/ticket/{id}/responder', [SuporteController::class, 'responder'])->name('responder');
         Route::post('/ticket/{id}/fechar', [SuporteController::class, 'fechar'])->name('fechar');
+    });
+
+    // Área Clientes (admin, suporte e customer success manager)
+    Route::middleware(['role:admin,suporte,customer_success_manager'])->prefix('clientes')->name('clientes.')->group(function () {
+        Route::get('/', [ClienteController::class, 'index'])->name('index');
+        Route::get('/{id}', [ClienteController::class, 'show'])->name('show');
     });
 
     // Busca global

@@ -29,7 +29,7 @@ class BuscaController extends Controller
         ];
 
         // Busca em tickets (disponível para admin e suporte)
-        if (in_array($user->role, ['admin', 'suporte'])) {
+        if (in_array($user->role, ['admin', 'suporte', 'customer_success_manager'])) {
             // Busca por ID, email ou assunto
             $ticketIdsByDirect = Ticket::where(function($q) use ($query) {
                     if (is_numeric($query)) {

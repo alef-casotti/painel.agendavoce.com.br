@@ -81,6 +81,17 @@
                 </a>
             @endif
 
+            @if($user->isAdmin() || $user->isSuporte() || $user->isCustomerSuccessManager())
+                <a href="{{ route('clientes.index') }}" 
+                   class="sidebar-link flex items-center px-4 py-3.5 {{ str_contains($currentRoute, 'clientes') ? 'active text-blue-800 bg-gradient-to-r from-blue-50 to-white border-l-4 border-blue-600 shadow-md' : 'text-indigo-900 hover:bg-blue-50/80 hover:text-blue-700' }} rounded-r-lg transition-all duration-200 group"
+                   @click="sidebarOpen = false">
+                    <svg class="w-5 h-5 mr-3 flex-shrink-0 {{ str_contains($currentRoute, 'admin.users') ? 'text-blue-600' : 'text-indigo-600 group-hover:text-blue-600' }} transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                    </svg>
+                    <span>Clientes</span>
+                </a>
+            @endif
+
             @if($user->isAdmin())
                 <a href="{{ route('admin.users.index') }}" 
                    class="sidebar-link flex items-center px-4 py-3.5 {{ str_contains($currentRoute, 'admin.users') ? 'active text-blue-800 bg-gradient-to-r from-blue-50 to-white border-l-4 border-blue-600 shadow-md' : 'text-indigo-900 hover:bg-blue-50/80 hover:text-blue-700' }} rounded-r-lg transition-all duration-200 group"
