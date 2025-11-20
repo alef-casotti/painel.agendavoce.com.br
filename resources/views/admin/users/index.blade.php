@@ -49,6 +49,7 @@
                             <option value="admin" {{ request('role') == 'admin' ? 'selected' : '' }}>Admin</option>
                             <option value="financeiro" {{ request('role') == 'financeiro' ? 'selected' : '' }}>Financeiro</option>
                             <option value="suporte" {{ request('role') == 'suporte' ? 'selected' : '' }}>Suporte</option>
+                            <option value="customer_success_manager" {{ request('role') == 'customer_success_manager' ? 'selected' : '' }}>Customer Success Manager</option>
                         </select>
                     </div>
                     <div class="flex items-end gap-2">
@@ -88,11 +89,13 @@
                                                 'admin' => 'bg-red-100 text-red-800',
                                                 'financeiro' => 'bg-green-100 text-green-800',
                                                 'suporte' => 'bg-blue-100 text-blue-800',
+                                                'customer_success_manager' => 'bg-purple-100 text-purple-800',
                                             ];
                                             $roleLabels = [
                                                 'admin' => 'Admin',
                                                 'financeiro' => 'Financeiro',
                                                 'suporte' => 'Suporte',
+                                                'customer_success_manager' => 'Customer Success Manager',
                                             ];
                                             $color = $roleColors[$user->role] ?? 'bg-gray-100 text-gray-800';
                                             $label = $roleLabels[$user->role] ?? $user->role;

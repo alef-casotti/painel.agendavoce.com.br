@@ -69,6 +69,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Verificar se o usuário é Customer Success Manager
+     */
+    public function isCustomerSuccessManager(): bool
+    {
+        return $this->role === 'customer_success_manager';
+    }
+
+    /**
      * Verificar se o usuário tem acesso a uma área específica
      */
     public function hasAccess(string $area): bool
@@ -79,7 +87,8 @@ class User extends Authenticatable
 
         return match($area) {
             'financeiro' => $this->isFinanceiro(),
-            'suporte' => $this->isSuporte(),
+            'suporte' => $this->isSuporte() || $this->isCustomerSuccessManager(),
+            'customer_success' => $this->isCustomerSuccessManager(),
             default => false,
         };
     }

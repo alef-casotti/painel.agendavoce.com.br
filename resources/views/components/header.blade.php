@@ -46,7 +46,7 @@
                 </button> --}}
 
                 <!-- Messages - Apenas para admin e suporte -->
-                @if(in_array($user->role, ['admin', 'suporte']))
+                @if(in_array($user->role, ['admin', 'suporte', 'customer_success_manager']))
                     <a href="{{ route('suporte.index') }}" class="relative p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
                         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>

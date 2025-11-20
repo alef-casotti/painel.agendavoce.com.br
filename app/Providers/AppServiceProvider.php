@@ -29,7 +29,7 @@ class AppServiceProvider extends ServiceProvider
             // Só conta se o usuário for admin ou suporte
             if (Auth::check()) {
                 $user = Auth::user();
-                if (in_array($user->role, ['admin', 'suporte'])) {
+                if (in_array($user->role, ['admin', 'suporte', 'customer_success_manager'])) {
                     $novasMensagens = Message::where('sender_type', 'cliente')
                         ->whereNull('answered_at')
                         ->count();

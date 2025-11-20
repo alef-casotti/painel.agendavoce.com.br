@@ -120,6 +120,7 @@
                             <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Admin</option>
                             <option value="financeiro" {{ old('role') == 'financeiro' ? 'selected' : '' }}>Financeiro</option>
                             <option value="suporte" {{ old('role') == 'suporte' ? 'selected' : '' }}>Suporte</option>
+                            <option value="customer_success_manager" {{ old('role') == 'customer_success_manager' ? 'selected' : '' }}>Customer Success Manager</option>
                         </select>
                         @error('role')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -127,7 +128,8 @@
                         <p class="mt-1 text-sm text-gray-500">
                             <strong>Admin:</strong> Acesso completo ao sistema<br>
                             <strong>Financeiro:</strong> Acesso à área financeira<br>
-                            <strong>Suporte:</strong> Acesso à área de suporte
+                            <strong>Suporte:</strong> Acesso à área de suporte<br>
+                            <strong>Customer Success Manager:</strong> Acesso ampliado ao suporte e relacionamento
                         </p>
                     </div>
 

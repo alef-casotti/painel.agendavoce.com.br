@@ -40,4 +40,9 @@ return [
         'api_key' => env('API_AGENDA_VOCE_KEY'),
     ],
 
+    'usuarios' => [
+        'base_url' => env('API_AGENDA_VOCE_URL'),
+        'api_token' => env('API_AGENDA_VOCE_KEY'),
+    ],
+
 ];

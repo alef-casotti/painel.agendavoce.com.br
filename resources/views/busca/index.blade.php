@@ -34,7 +34,7 @@
                 </div>
             @else
                 <!-- Tickets Results -->
-                @if($results['tickets']->count() > 0 && in_array(auth()->user()->role, ['admin', 'suporte']))
+                @if($results['tickets']->count() > 0 && in_array(auth()->user()->role, ['admin', 'suporte', 'customer_success_manager']))
                     <div class="card mb-6 overflow-hidden">
                         <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
                             <h2 class="text-xl font-semibold text-gray-900">
