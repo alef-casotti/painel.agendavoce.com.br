@@ -112,7 +112,6 @@ class ClienteController extends Controller
                         'status' => $status,
                         'since' => $dataCriacao,
                         'mrr' => $this->formatarPlano($usuario['plano']),
-                        'touchpoint' => $this->gerarTouchpoint($usuario),
                         'id' => $usuario['id'],
                         'telefone' => $this->formatarTelefone($usuario['telefone'] ?? ''),
                         'plano' => $usuario['plano'],
@@ -155,6 +154,9 @@ class ClienteController extends Controller
                         return $cliente['status'] === $statusFiltro;
                     })->values();
                 }
+
+                // Ordenar por nome em ordem alfabética
+                $clientes = $clientes->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)->values();
 
                 $metrics = [
                     [
@@ -203,26 +205,6 @@ class ClienteController extends Controller
         ];
 
         return $planos[$plano] ?? ucfirst($plano);
-    }
-
-    /**
-     * Gerar mensagem de touchpoint baseado nos dados do usuário
-     */
-    private function gerarTouchpoint($usuario)
-    {
-        if ($usuario['total_agendamentos'] > 0) {
-            return "{$usuario['total_agendamentos']} agendamento(s) realizados";
-        }
-
-        if ($usuario['total_servicos'] > 0 && $usuario['total_agendamentos'] === 0) {
-            return "Cadastrou {$usuario['total_servicos']} serviço(s), aguardando primeiro agendamento";
-        }
-
-        if ($usuario['tem_pagina_publica']) {
-            return "Página pública ativa";
-        }
-
-        return "Usuário cadastrado recentemente";
     }
 
     /**

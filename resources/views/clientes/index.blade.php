@@ -133,7 +133,6 @@
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Desde</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">MRR</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Último touchpoint</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"></th>
                             </tr>
                         </thead>
@@ -160,7 +159,6 @@
                                     </td>
                                     <td class="px-4 py-4 text-sm text-gray-600">{{ $cliente['since'] }}</td>
                                     <td class="px-4 py-4 text-sm font-semibold text-gray-900">{{ $cliente['mrr'] }}</td>
-                                    <td class="px-4 py-4 text-sm text-gray-600">{{ $cliente['touchpoint'] }}</td>
                                     <td class="px-4 py-4 text-right">
                                         <a href="{{ route('clientes.show', $cliente['id']) }}" class="text-blue-600 hover:text-blue-800 text-sm font-medium">Detalhes</a>
                                     </td>
@@ -204,7 +202,6 @@
                                 <p><strong class="text-gray-700">Telefone:</strong> {{ $cliente['telefone'] ?? '-' }}</p>
                                 <p><strong class="text-gray-700">Desde:</strong> {{ $cliente['since'] }}</p>
                                 <p><strong class="text-gray-700">MRR:</strong> {{ $cliente['mrr'] }}</p>
-                                <p class="text-gray-700">{{ $cliente['touchpoint'] }}</p>
                             </div>
                             <div class="mt-4 flex justify-end">
                                 <a href="{{ route('clientes.show', $cliente['id']) }}" class="text-blue-600 hover:text-blue-800 text-sm font-medium">Ver detalhes</a>

@@ -242,123 +242,6 @@
                                     @endif
                                 </div>
                             @endif
-
-                            @if(!empty($healthHighlights['burn_rate']))
-                                @php
-                                    $card = $healthHighlights['burn_rate'];
-                                    $style = $card['style'] ?? 'neutral';
-                                    $isNegative = $style === 'negative';
-                                    $containerClasses = $isNegative
-                                        ? 'bg-gradient-to-br from-red-50 to-red-100 border border-red-200'
-                                        : 'bg-gradient-to-br from-green-50 to-green-100 border border-green-200';
-                                    $labelClasses = $isNegative ? 'text-red-600' : 'text-green-600';
-                                    $metaLabelClasses = $isNegative ? 'text-red-700' : 'text-green-700';
-                                    $metaValueClasses = $isNegative ? 'text-red-800' : 'text-green-800';
-                                @endphp
-                                <div class="{{ $containerClasses }} p-6 rounded-xl">
-                                    <span class="{{ $labelClasses }} text-sm font-medium">{{ $card['label'] }}</span>
-                                    <p class="text-gray-600 text-xs mt-2 leading-relaxed">{{ $card['description'] }}</p>
-                                    <p class="text-3xl font-bold text-gray-900 mt-4">{{ $card['value'] }}</p>
-                                    @if(!empty($card['meta']))
-                                        <div class="mt-4 p-3 bg-white bg-opacity-60 border {{ $isNegative ? 'border-red-200' : 'border-green-200' }} rounded-lg">
-                                            <div class="flex items-center justify-between">
-                                                <span class="text-xs font-semibold {{ $metaLabelClasses }}">{{ $card['meta']['label'] }}</span>
-                                                <span class="text-sm font-bold {{ $metaValueClasses }}">{{ $card['meta']['value'] }}</span>
-                                            </div>
-                                            @if(!empty($card['meta']['hint']))
-                                                <p class="text-xs text-gray-600 mt-2">{{ $card['meta']['hint'] }}</p>
-                                            @endif
-                                        </div>
-                                    @endif
-                                </div>
-                            @endif
-
-                            @if(!empty($healthHighlights['receita_liquida']))
-                                @php
-                                    $card = $healthHighlights['receita_liquida'];
-                                    $style = $card['style'] ?? 'neutral';
-                                    $isNegative = $style === 'negative';
-                                    $containerClasses = $isNegative
-                                        ? 'bg-gradient-to-br from-red-50 to-red-100 border border-red-200'
-                                        : 'bg-gradient-to-br from-green-50 to-green-100 border border-green-200';
-                                    $labelClasses = $isNegative ? 'text-red-600' : 'text-green-600';
-                                    $metaLabelClasses = $isNegative ? 'text-red-700' : 'text-green-700';
-                                    $metaValueClasses = $isNegative ? 'text-red-800' : 'text-green-800';
-                                @endphp
-                                <div class="{{ $containerClasses }} p-6 rounded-xl">
-                                    <span class="{{ $labelClasses }} text-sm font-medium">{{ $card['label'] }}</span>
-                                    <p class="text-gray-600 text-xs mt-2 leading-relaxed">{{ $card['description'] }}</p>
-                                    <p class="text-3xl font-bold text-gray-900 mt-4">{{ $card['value'] }}</p>
-                                    @if(!empty($card['meta']))
-                                        <div class="mt-4 p-3 bg-white bg-opacity-60 border {{ $isNegative ? 'border-red-200' : 'border-green-200' }} rounded-lg">
-                                            <div class="flex items-center justify-between">
-                                                <span class="text-xs font-semibold {{ $metaLabelClasses }}">{{ $card['meta']['label'] ?? '' }}</span>
-                                                <span class="text-sm font-bold {{ $metaValueClasses }}">{{ $card['meta']['value'] ?? '' }}</span>
-                                            </div>
-                                            @if(!empty($card['meta']['hint']))
-                                                <p class="text-xs text-gray-600 mt-2">{{ $card['meta']['hint'] }}</p>
-                                            @endif
-                                        </div>
-                                    @endif
-                                </div>
-                            @endif
-
-                            @if(!empty($healthHighlights['expenses_total']))
-                                @php
-                                    $card = $healthHighlights['expenses_total'];
-                                    $style = $card['style'] ?? 'neutral';
-                                    $isNegative = $style === 'negative';
-                                    $containerClasses = $isNegative
-                                        ? 'bg-gradient-to-br from-red-50 to-red-100 border border-red-200'
-                                        : 'bg-gradient-to-br from-green-50 to-green-100 border border-green-200';
-                                    $labelClasses = $isNegative ? 'text-red-600' : 'text-green-600';
-                                    $metaLabelClasses = $isNegative ? 'text-red-700' : 'text-green-700';
-                                    $metaValueClasses = $isNegative ? 'text-red-800' : 'text-green-800';
-                                @endphp
-                                <div class="{{ $containerClasses }} p-6 rounded-xl">
-                                    <span class="{{ $labelClasses }} text-sm font-medium">{{ $card['label'] }}</span>
-                                    <p class="text-gray-600 text-xs mt-2 leading-relaxed">{{ $card['description'] }}</p>
-                                    <p class="text-3xl font-bold text-gray-900 mt-4">{{ $card['value'] }}</p>
-                                    @if(!empty($card['meta']))
-                                        <div class="mt-4 p-3 bg-white bg-opacity-60 border {{ $isNegative ? 'border-red-200' : 'border-green-200' }} rounded-lg">
-                                            <div class="flex items-center justify-between">
-                                                <span class="text-xs font-semibold {{ $metaLabelClasses }}">{{ $card['meta']['label'] }}</span>
-                                                <span class="text-sm font-bold {{ $metaValueClasses }}">{{ $card['meta']['value'] }}</span>
-                                            </div>
-                                            @if(!empty($card['meta']['hint']))
-                                                <p class="text-xs text-gray-600 mt-2">{{ $card['meta']['hint'] }}</p>
-                                            @endif
-                                        </div>
-                                    @endif
-                                </div>
-                            @endif
-
-                            @if(!empty($healthHighlights['net_profit']))
-                                @php
-                                    $card = $healthHighlights['net_profit'];
-                                    $style = $card['style'] ?? 'neutral';
-                                    $isNegative = $style === 'negative';
-                                    $containerClasses = $isNegative
-                                        ? 'bg-gradient-to-br from-red-50 via-red-100 to-white border border-red-200'
-                                        : 'bg-gradient-to-br from-blue-50 via-blue-100 to-white border border-blue-200';
-                                    $labelClasses = $isNegative ? 'text-red-600' : 'text-blue-600';
-                                    $iconClasses = $isNegative ? 'text-red-200' : 'text-blue-200';
-                                @endphp
-                                <div class="{{ $containerClasses }} p-6 rounded-xl shadow-sm">
-                                    <div class="flex items-center justify-between mb-4">
-                                        <span class="{{ $labelClasses }} text-sm font-semibold uppercase tracking-wide">
-                                            {{ $card['label'] }}
-                                        </span>
-                                        <svg class="w-5 h-5 {{ $iconClasses }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                        </svg>
-                                    </div>
-                                    <p class="text-xs text-gray-600 leading-relaxed">{{ $card['description'] }}</p>
-                                    <p class="text-4xl font-extrabold mt-5 text-gray-900">
-                                        {{ $card['value'] }}
-                                    </p>
-                                </div>
-                            @endif
                         </div>
                     </section>
                 @endif
@@ -373,36 +256,6 @@
                             @if(!empty($growthHighlights['clientes_ativos']))
                                 @php
                                     $card = $growthHighlights['clientes_ativos'];
-                                    $style = $card['style'] ?? 'neutral';
-                                    $isNegative = $style === 'negative';
-                                    $containerClasses = $isNegative
-                                        ? 'bg-gradient-to-br from-red-50 to-red-100 border border-red-200'
-                                        : 'bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200';
-                                    $labelClasses = $isNegative ? 'text-red-600' : 'text-orange-600';
-                                    $metaLabelClasses = $isNegative ? 'text-red-700' : 'text-orange-700';
-                                    $metaValueClasses = $isNegative ? 'text-red-800' : 'text-orange-800';
-                                @endphp
-                                <div class="{{ $containerClasses }} p-6 rounded-xl">
-                                    <span class="{{ $labelClasses }} text-sm font-medium">{{ $card['label'] }}</span>
-                                    <p class="text-gray-600 text-xs mt-2 leading-relaxed">{{ $card['description'] }}</p>
-                                    <p class="text-3xl font-bold text-gray-900 mt-4">{{ $card['value'] }}</p>
-                                    @if(!empty($card['meta']))
-                                        <div class="mt-4 p-3 bg-white bg-opacity-60 border {{ $isNegative ? 'border-red-200' : 'border-green-200' }} rounded-lg">
-                                            <div class="flex items-center justify-between">
-                                                <span class="text-xs font-semibold {{ $metaLabelClasses }}">{{ $card['meta']['label'] }}</span>
-                                                <span class="text-sm font-bold {{ $metaValueClasses }}">{{ $card['meta']['value'] }}</span>
-                                            </div>
-                                            @if(!empty($card['meta']['hint']))
-                                                <p class="text-xs text-gray-600 mt-2">{{ $card['meta']['hint'] }}</p>
-                                            @endif
-                                        </div>
-                                    @endif
-                                </div>
-                            @endif
-
-                            @if(!empty($growthHighlights['arpu']))
-                                @php
-                                    $card = $growthHighlights['arpu'];
                                     $style = $card['style'] ?? 'neutral';
                                     $isNegative = $style === 'negative';
                                     $containerClasses = $isNegative
@@ -455,41 +308,6 @@
                                     <span class="{{ $labelClasses }} text-sm font-medium">{{ $card['label'] }}</span>
                                     <p class="text-gray-600 text-xs mt-2 leading-relaxed">{{ $card['description'] ?? '' }}</p>
                                     <p class="text-3xl font-bold text-gray-900 mt-4">{{ $card['value'] }}</p>
-                                </div>
-                            @endif
-
-                            @if(!empty($acquisitionHighlights['cac']))
-                                @php
-                                    $card = $acquisitionHighlights['cac'];
-                                    $style = $card['style'] ?? 'neutral';
-                                    $isNegative = $style === 'negative';
-                                    $containerClasses = $isNegative
-                                        ? 'bg-gradient-to-br from-red-50 to-red-100 border border-red-200'
-                                        : 'bg-gradient-to-br from-purple-100 via-purple-200 to-white border border-purple-300';
-                                    $labelClasses = $isNegative ? 'text-red-600' : 'text-purple-700';
-                                    $metaLabelClasses = $isNegative ? 'text-red-700' : 'text-purple-700';
-                                    $metaValueClasses = $isNegative ? 'text-red-800' : 'text-purple-800';
-                                @endphp
-                                <div class="{{ $containerClasses }} p-6 rounded-xl">
-                                    <div class="flex items-center justify-between mb-3">
-                                        <span class="{{ $labelClasses }} text-sm font-semibold uppercase tracking-wide">{{ $card['label'] }}</span>
-                                        <svg class="w-5 h-5 {{ $isNegative ? 'text-red-200' : 'text-purple-300' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                        </svg>
-                                    </div>
-                                    <p class="text-gray-600 text-xs leading-relaxed">{{ $card['description'] ?? '' }}</p>
-                                    <p class="text-3xl font-bold text-gray-900 mt-4">{{ $card['value'] }}</p>
-                                    @if(!empty($card['meta']))
-                                        <div class="mt-4 p-3 bg-white bg-opacity-70 border {{ $isNegative ? 'border-red-200' : 'border-purple-200' }} rounded-lg">
-                                            <div class="flex items-center justify-between">
-                                                <span class="text-xs font-semibold {{ $metaLabelClasses }}">{{ $card['meta']['label'] }}</span>
-                                                <span class="text-sm font-bold {{ $metaValueClasses }}">{{ $card['meta']['value'] }}</span>
-                                            </div>
-                                            @if(!empty($card['meta']['hint']))
-                                                <p class="text-xs text-gray-600 mt-2">{{ $card['meta']['hint'] }}</p>
-                                            @endif
-                                        </div>
-                                    @endif
                                 </div>
                             @endif
 
