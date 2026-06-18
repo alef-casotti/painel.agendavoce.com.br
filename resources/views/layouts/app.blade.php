@@ -82,6 +82,7 @@
         body {
             opacity: 0;
             transition: opacity 0.3s ease-in;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         }
         body.loaded {
             opacity: 1;

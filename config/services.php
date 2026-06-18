@@ -45,4 +45,8 @@ return [
         'api_token' => env('API_AGENDA_VOCE_KEY'),
     ],
 
+    'agendavoce' => [
+        'public_url' => env('AGENDA_VOCE_PUBLIC_URL', 'https://agendavoce.com.br'),
+    ],
+
 ];
