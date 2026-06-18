@@ -10,9 +10,12 @@
             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div>
                     <h1 class="text-3xl font-bold text-gray-900">Área Financeira</h1>
-                    <p class="text-gray-600">Visão centralizada das finanças do painel.</p>
+                    <p class="text-gray-600">Visão centralizada de receitas, despesas e resultado do mês.</p>
                 </div>
                 <div class="flex flex-col md:flex-row md:items-center gap-3">
+                    <a href="{{ route('financeiro.recebimentos.index') }}" class="inline-flex items-center justify-center px-4 py-2 border border-emerald-200 rounded-lg text-emerald-700 bg-emerald-50 hover:bg-emerald-100 transition">
+                        Ver recebimentos
+                    </a>
                     <a href="{{ route('financeiro.pagamentos.create') }}" class="btn-primary inline-flex items-center justify-center">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
@@ -25,31 +28,117 @@
                 </div>
             </div>
 
+            @if($receitaError)
+                <div class="p-4 bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-lg">
+                    {{ $receitaError }}
+                </div>
+            @endif
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="card p-5 bg-white border-l-4 border-emerald-500">
+                    <p class="text-sm text-gray-500 mb-1">Receita recorrente (MRR)</p>
+                    @if($resumo['mrr'] !== null)
+                        <span class="text-2xl font-semibold text-emerald-600">R$ {{ number_format($resumo['mrr'], 2, ',', '.') }}</span>
+                        <p class="text-xs text-gray-500 mt-2">{{ number_format($resumo['clientes_pagantes'] ?? 0, 0, '', '.') }} clientes em operação</p>
+                    @else
+                        <span class="text-2xl font-semibold text-gray-400">Indisponível</span>
+                    @endif
+                </div>
+                <div class="card p-5 bg-white border-l-4 border-orange-500">
+                    <p class="text-sm text-gray-500 mb-1">Despesas pagas no mês</p>
+                    <span class="text-2xl font-semibold text-orange-600">R$ {{ number_format($resumo['despesas_pagas_mes'], 2, ',', '.') }}</span>
+                    <p class="text-xs text-gray-500 mt-2">Previsto: R$ {{ number_format($resumo['despesas_previstas_mes'], 2, ',', '.') }}</p>
+                </div>
+                <div class="card p-5 bg-white border-l-4 {{ ($resumo['resultado'] ?? 0) >= 0 ? 'border-emerald-500' : 'border-red-500' }}">
+                    <p class="text-sm text-gray-500 mb-1">Resultado do mês</p>
+                    @if($resumo['resultado'] !== null)
+                        <span class="text-2xl font-semibold {{ $resumo['resultado'] >= 0 ? 'text-emerald-600' : 'text-red-600' }}">
+                            R$ {{ number_format($resumo['resultado'], 2, ',', '.') }}
+                        </span>
+                        <p class="text-xs mt-2 {{ $resumo['resultado'] >= 0 ? 'text-emerald-600' : 'text-red-600' }}">
+                            {{ $resumo['resultado'] >= 0 ? 'Recebendo mais do que gastando' : 'Gastando mais do que recebendo' }}
+                        </p>
+                    @else
+                        <span class="text-2xl font-semibold text-gray-400">Indisponível</span>
+                    @endif
+                </div>
+            </div>
+
+            <p class="text-xs text-gray-500">
+                O MRR representa a soma mensal das assinaturas ativas, não o valor efetivamente recebido no calendário. As despesas consideram pagamentos com data de pagamento no mês corrente.
+            </p>
+
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div class="card p-5 bg-white">
-                    <p class="text-sm text-gray-500 mb-1">Total previsto (este mês)</p>
+                    <p class="text-sm text-gray-500 mb-1">Despesas previstas (mês)</p>
                     <span class="text-2xl font-semibold text-gray-900">R$ {{ number_format($resumo['total_previsto_mes'], 2, ',', '.') }}</span>
                 </div>
                 <div class="card p-5 bg-white">
-                    <p class="text-sm text-gray-500 mb-1">Total pago (este mês)</p>
-                    <span class="text-2xl font-semibold text-emerald-600">R$ {{ number_format($resumo['total_pago_mes'], 2, ',', '.') }}</span>
+                    <p class="text-sm text-gray-500 mb-1">Despesas pagas (mês)</p>
+                    <span class="text-2xl font-semibold text-gray-900">R$ {{ number_format($resumo['total_pago_mes'], 2, ',', '.') }}</span>
                 </div>
                 <div class="card p-5 bg-white">
                     <p class="text-sm text-gray-500 mb-1">Pagamentos pendentes/atrasados</p>
                     <span class="text-2xl font-semibold text-amber-600">{{ $resumo['pendentes'] }}</span>
                 </div>
                 <div class="card p-5 bg-white">
-                    <p class="text-sm text-gray-500 mb-1">Lançamentos no mês</p>
+                    <p class="text-sm text-gray-500 mb-1">Lançamentos de despesas no mês</p>
                     <span class="text-2xl font-semibold text-gray-900">{{ $resumo['pagamentos_mes'] }}</span>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
-                <div class="card p-6 xl:col-span-2">
+            <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                <div class="card p-6">
                     <div class="flex items-center justify-between mb-4">
                         <div>
-                            <h2 class="text-xl font-semibold text-gray-900">Últimos pagamentos lançados</h2>
-                            <p class="text-sm text-gray-500">Acompanhe as movimentações recém-registradas.</p>
+                            <h2 class="text-xl font-semibold text-gray-900">Recebimentos</h2>
+                            <p class="text-sm text-gray-500">Assinaturas ativas dos clientes.</p>
+                        </div>
+                        <a href="{{ route('financeiro.recebimentos.index') }}" class="text-sm font-medium text-blue-600 hover:text-blue-700 transition">
+                            Ver todos
+                        </a>
+                    </div>
+
+                    @if($ultimosRecebimentos->isEmpty())
+                        <div class="p-6 bg-gray-50 border border-dashed border-gray-200 rounded-lg text-center">
+                            <p class="text-gray-500">Nenhuma assinatura ativa encontrada.</p>
+                        </div>
+                    @else
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Cliente</th>
+                                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Plano</th>
+                                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Valor/mês</th>
+                                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Desde</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    @foreach($ultimosRecebimentos as $recebimento)
+                                        <tr class="hover:bg-gray-50 transition">
+                                            <td class="px-4 py-3">
+                                                <a href="{{ route('clientes.show', $recebimento['id']) }}" class="font-medium text-blue-600 hover:text-blue-700">
+                                                    {{ $recebimento['nome'] }}
+                                                </a>
+                                                <div class="text-xs text-gray-500">{{ $recebimento['email'] }}</div>
+                                            </td>
+                                            <td class="px-4 py-3 text-sm text-gray-600">{{ $recebimento['plano'] }}</td>
+                                            <td class="px-4 py-3 text-sm font-semibold text-emerald-600">R$ {{ number_format($recebimento['valor'], 2, ',', '.') }}</td>
+                                            <td class="px-4 py-3 text-sm text-gray-600">{{ $recebimento['started_at_formatada'] ?? '-' }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @endif
+                </div>
+
+                <div class="card p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h2 class="text-xl font-semibold text-gray-900">Últimos pagamentos</h2>
+                            <p class="text-sm text-gray-500">Despesas recém-registradas.</p>
                         </div>
                         <a href="{{ route('financeiro.pagamentos.index') }}" class="text-sm font-medium text-blue-600 hover:text-blue-700 transition">
                             Ver todos
@@ -58,7 +147,7 @@
 
                     @if($ultimosPagamentos->isEmpty())
                         <div class="p-6 bg-gray-50 border border-dashed border-gray-200 rounded-lg text-center">
-                            <p class="text-gray-500">Ainda não há pagamentos cadastrados. Comece registrando suas despesas.</p>
+                            <p class="text-gray-500">Ainda não há pagamentos cadastrados.</p>
                         </div>
                     @else
                         <div class="overflow-x-auto">
@@ -66,7 +155,6 @@
                                 <thead class="bg-gray-50">
                                     <tr>
                                         <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Título</th>
-                                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Categoria</th>
                                         <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Valor</th>
                                         <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
                                         <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Vencimento</th>
@@ -77,9 +165,8 @@
                                         <tr class="hover:bg-gray-50 transition">
                                             <td class="px-4 py-3">
                                                 <div class="font-medium text-gray-900">{{ $pagamento->titulo }}</div>
-                                                <div class="text-xs text-gray-500">{{ $pagamento->created_at?->format('d/m/Y H:i') }}</div>
+                                                <div class="text-xs text-gray-500">{{ $pagamento->categoria?->nome ?? 'Sem categoria' }}</div>
                                             </td>
-                                            <td class="px-4 py-3 text-sm text-gray-600">{{ $pagamento->categoria?->nome ?? '-' }}</td>
                                             <td class="px-4 py-3 text-sm font-semibold text-gray-900">R$ {{ number_format($pagamento->valor_previsto, 2, ',', '.') }}</td>
                                             <td class="px-4 py-3 text-sm">
                                                 @php
@@ -102,39 +189,39 @@
                         </div>
                     @endif
                 </div>
+            </div>
 
-                <div class="card p-6 space-y-4">
-                    <div class="flex items-center justify-between">
-                        <h2 class="text-xl font-semibold text-gray-900">Próximos vencimentos</h2>
-                        <a href="{{ route('financeiro.pagamentos.index', ['status' => 'pendente']) }}" class="text-sm font-medium text-blue-600 hover:text-blue-700 transition">
-                            Ver pendentes
-                        </a>
-                    </div>
-
-                    @if($proximosPagamentos->isEmpty())
-                        <div class="p-5 bg-gray-50 border border-dashed border-gray-200 rounded-lg text-center">
-                            <p class="text-sm text-gray-500">Nenhum pagamento pendente ou atrasado cadastrado.</p>
-                        </div>
-                    @else
-                        <div class="space-y-4">
-                            @foreach($proximosPagamentos as $pagamento)
-                                <div class="border border-gray-100 rounded-lg p-4 hover:border-blue-100 bg-white transition">
-                                    <div class="flex items-start justify-between">
-                                        <div>
-                                            <p class="text-sm font-semibold text-gray-900">{{ $pagamento->titulo }}</p>
-                                            <p class="text-xs text-gray-500">{{ $pagamento->categoria?->nome ?? 'Sem categoria' }}</p>
-                                        </div>
-                                        <span class="text-sm font-semibold text-gray-900">R$ {{ number_format($pagamento->valor_previsto, 2, ',', '.') }}</span>
-                                    </div>
-                                    <div class="flex items-center justify-between mt-3 text-xs text-gray-500">
-                                        <span>Vencimento: <strong class="text-gray-700">{{ $pagamento->data_vencimento?->format('d/m/Y') ?? '-' }}</strong></span>
-                                        <a href="{{ route('financeiro.pagamentos.edit', $pagamento) }}" class="text-blue-600 hover:text-blue-700 font-medium">Atualizar</a>
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-                    @endif
+            <div class="card p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-semibold text-gray-900">Próximos vencimentos</h2>
+                    <a href="{{ route('financeiro.pagamentos.index', ['status' => 'pendente']) }}" class="text-sm font-medium text-blue-600 hover:text-blue-700 transition">
+                        Ver pendentes
+                    </a>
                 </div>
+
+                @if($proximosPagamentos->isEmpty())
+                    <div class="p-5 bg-gray-50 border border-dashed border-gray-200 rounded-lg text-center">
+                        <p class="text-sm text-gray-500">Nenhum pagamento pendente ou atrasado cadastrado.</p>
+                    </div>
+                @else
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        @foreach($proximosPagamentos as $pagamento)
+                            <div class="border border-gray-100 rounded-lg p-4 hover:border-blue-100 bg-white transition">
+                                <div class="flex items-start justify-between">
+                                    <div>
+                                        <p class="text-sm font-semibold text-gray-900">{{ $pagamento->titulo }}</p>
+                                        <p class="text-xs text-gray-500">{{ $pagamento->categoria?->nome ?? 'Sem categoria' }}</p>
+                                    </div>
+                                    <span class="text-sm font-semibold text-gray-900">R$ {{ number_format($pagamento->valor_previsto, 2, ',', '.') }}</span>
+                                </div>
+                                <div class="flex items-center justify-between mt-3 text-xs text-gray-500">
+                                    <span>Vencimento: <strong class="text-gray-700">{{ $pagamento->data_vencimento?->format('d/m/Y') ?? '-' }}</strong></span>
+                                    <a href="{{ route('financeiro.pagamentos.edit', $pagamento) }}" class="text-blue-600 hover:text-blue-700 font-medium">Atualizar</a>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
             </div>
         </div>
     </main>
