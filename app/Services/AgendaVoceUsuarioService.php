@@ -77,10 +77,10 @@ class AgendaVoceUsuarioService
             $response = Http::timeout(10)
                 ->withToken($apiToken)
                 ->acceptJson()
-                ->get("{$baseUrl}/api/usuarios");
+                ->get("{$baseUrl}/api/financeiro/recebimentos");
 
             if (! $response->successful()) {
-                Log::warning('Usuario list API returned an error response', [
+                Log::warning('Financeiro recebimentos API returned an error response', [
                     'status' => $response->status(),
                     'body' => $response->json(),
                 ]);
@@ -123,7 +123,7 @@ class AgendaVoceUsuarioService
                 'error' => null,
             ];
         } catch (\Throwable $exception) {
-            Log::error('Usuario list API request failed', [
+            Log::error('Financeiro recebimentos API request failed', [
                 'message' => $exception->getMessage(),
             ]);
 

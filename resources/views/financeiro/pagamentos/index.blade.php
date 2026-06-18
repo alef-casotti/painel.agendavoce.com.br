@@ -14,15 +14,21 @@
                     <h1 class="text-3xl font-bold text-gray-900">Pagamentos</h1>
                     <p class="text-gray-600">Controle detalhado de todas as saídas financeiras</p>
                 </div>
-                <div class="flex items-center gap-3">
-                    <a href="{{ route('financeiro.index') }}" class="inline-flex items-center justify-center px-4 py-2 border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 transition">
+                <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 w-full md:w-auto">
+                    <a href="{{ route('financeiro.index') }}" class="btn-outline inline-flex items-center justify-center">
+                        <svg class="w-5 h-5 mr-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                        </svg>
                         Voltar ao financeiro
                     </a>
-                    <a href="{{ route('financeiro.recebimentos.index') }}" class="inline-flex items-center justify-center px-4 py-2 border border-emerald-200 rounded-lg text-emerald-700 bg-emerald-50 hover:bg-emerald-100 transition">
+                    <a href="{{ route('financeiro.recebimentos.index') }}" class="btn-secondary inline-flex items-center justify-center">
+                        <svg class="w-5 h-5 mr-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                        </svg>
                         Ver recebimentos
                     </a>
-                    <a href="{{ route('financeiro.pagamentos.create') }}" class="btn-primary inline-flex items-center">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <a href="{{ route('financeiro.pagamentos.create') }}" class="btn-primary inline-flex items-center justify-center sm:ml-1">
+                        <svg class="w-5 h-5 mr-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                         </svg>
                         Novo pagamento

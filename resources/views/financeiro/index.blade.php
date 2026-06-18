@@ -12,18 +12,24 @@
                     <h1 class="text-3xl font-bold text-gray-900">Área Financeira</h1>
                     <p class="text-gray-600">Visão centralizada de receitas, despesas e resultado do mês.</p>
                 </div>
-                <div class="flex flex-col md:flex-row md:items-center gap-3">
-                    <a href="{{ route('financeiro.recebimentos.index') }}" class="inline-flex items-center justify-center px-4 py-2 border border-emerald-200 rounded-lg text-emerald-700 bg-emerald-50 hover:bg-emerald-100 transition">
+                <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 w-full md:w-auto">
+                    <a href="{{ route('financeiro.recebimentos.index') }}" class="btn-secondary inline-flex items-center justify-center">
+                        <svg class="w-5 h-5 mr-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                        </svg>
                         Ver recebimentos
                     </a>
-                    <a href="{{ route('financeiro.pagamentos.create') }}" class="btn-primary inline-flex items-center justify-center">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <a href="{{ route('financeiro.pagamentos.index') }}" class="btn-outline inline-flex items-center justify-center">
+                        <svg class="w-5 h-5 mr-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                        </svg>
+                        Gerenciar pagamentos
+                    </a>
+                    <a href="{{ route('financeiro.pagamentos.create') }}" class="btn-primary inline-flex items-center justify-center sm:ml-1">
+                        <svg class="w-5 h-5 mr-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                         </svg>
                         Novo pagamento
-                    </a>
-                    <a href="{{ route('financeiro.pagamentos.index') }}" class="inline-flex items-center justify-center px-4 py-2 border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 transition">
-                        Gerenciar pagamentos
                     </a>
                 </div>
             </div>
