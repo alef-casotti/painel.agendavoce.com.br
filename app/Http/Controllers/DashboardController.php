@@ -4,13 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Models\Message;
 use App\Models\Ticket;
+use App\Services\AgendaVoceUsuarioService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 
 class DashboardController extends Controller
 {
+    public function __construct(
+        private readonly AgendaVoceUsuarioService $usuarioService
+    ) {
+    }
     /**
      * Exibir o dashboard principal
      */
@@ -32,8 +35,8 @@ class DashboardController extends Controller
         $usuarioStatsHighlights = [];
         $usuarioStatsError = null;
 
-        $usuarioStatsResponse = $this->fetchUsuarioStats();
-        $usuarioStats = $usuarioStatsResponse['stats'];
+        $usuarioStatsResponse = $this->usuarioService->fetchStats();
+        $usuarioStats = $usuarioStatsResponse['data'];
         $usuarioStatsError = $usuarioStatsResponse['error'];
 
         if ($usuarioStats) {
@@ -170,55 +173,6 @@ class DashboardController extends Controller
             'respondentes' => $respondentes,
             'tempo_medio_por_atendente' => $tempoMedioPorAtendente,
         ];
-    }
-
-    /**
-     * Buscar estatísticas de usuários/clientes na API externa
-     */
-    private function fetchUsuarioStats(): array
-    {
-        $baseUrl = rtrim(config('services.usuarios.base_url') ?? '', '/');
-        $apiToken = config('services.usuarios.api_token');
-
-        if (!$baseUrl || !$apiToken) {
-            return [
-                'stats' => null,
-                'error' => 'Configuração da API de usuários não encontrada. Verifique as variáveis de ambiente.',
-            ];
-        }
-
-        try {
-            $response = Http::timeout(10)
-                ->withToken($apiToken)
-                ->acceptJson()
-                ->get("{$baseUrl}/api/usuarios/stats");
-
-            if ($response->successful()) {
-                return [
-                    'stats' => $response->json('data'),
-                    'error' => null,
-                ];
-            }
-
-            Log::warning('Usuario stats API returned an error response', [
-                'status' => $response->status(),
-                'body' => $response->json(),
-            ]);
-
-            return [
-                'stats' => null,
-                'error' => 'Não foi possível carregar as estatísticas de clientes no momento.',
-            ];
-        } catch (\Throwable $exception) {
-            Log::error('Usuario stats API request failed', [
-                'message' => $exception->getMessage(),
-            ]);
-
-            return [
-                'stats' => null,
-                'error' => 'Erro ao conectar com a API de estatísticas de clientes.',
-            ];
-        }
     }
 
     /**

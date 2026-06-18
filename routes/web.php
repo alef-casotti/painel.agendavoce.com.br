@@ -6,6 +6,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\FinanceiroController;
 use App\Http\Controllers\PagamentoController;
+use App\Http\Controllers\RecebimentoController;
 use App\Http\Controllers\SuporteController;
 use App\Http\Controllers\BuscaController;
 use App\Http\Controllers\ClienteController;
@@ -49,6 +50,7 @@ Route::middleware(['auth'])->group(function () {
     // Área Financeiro (admin e financeiro)
     Route::middleware(['role:admin,financeiro'])->prefix('financeiro')->name('financeiro.')->group(function () {
         Route::get('/', [FinanceiroController::class, 'index'])->name('index');
+        Route::get('/recebimentos', [RecebimentoController::class, 'index'])->name('recebimentos.index');
         Route::resource('pagamentos', PagamentoController::class);
     });
 
@@ -60,8 +62,8 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/ticket/{id}/fechar', [SuporteController::class, 'fechar'])->name('fechar');
     });
 
-    // Área Clientes (admin, suporte e customer success manager)
-    Route::middleware(['role:admin,suporte,customer_success_manager'])->prefix('clientes')->name('clientes.')->group(function () {
+    // Área Clientes (admin, suporte, customer success manager e financeiro)
+    Route::middleware(['role:admin,suporte,customer_success_manager,financeiro'])->prefix('clientes')->name('clientes.')->group(function () {
         Route::get('/', [ClienteController::class, 'index'])->name('index');
         Route::get('/{id}', [ClienteController::class, 'show'])->name('show');
     });
