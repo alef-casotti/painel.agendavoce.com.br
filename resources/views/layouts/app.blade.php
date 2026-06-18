@@ -107,6 +107,37 @@
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
             transform: translateY(-1px);
         }
+        .btn-secondary {
+            background-color: #ffffff !important;
+            color: #2563eb !important;
+            font-weight: 500;
+            padding: 0.625rem 1.25rem;
+            border-radius: 0.5rem;
+            border: 1px solid #2563eb;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+        .btn-secondary:hover {
+            background-color: #eff6ff !important;
+            border-color: #1d4ed8;
+            color: #1d4ed8 !important;
+            box-shadow: 0 2px 4px -1px rgba(37, 99, 235, 0.15);
+        }
+        .btn-outline {
+            background-color: #ffffff !important;
+            color: #374151 !important;
+            font-weight: 500;
+            padding: 0.625rem 1.25rem;
+            border-radius: 0.5rem;
+            border: 1px solid #d1d5db;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+        .btn-outline:hover {
+            background-color: #f9fafb !important;
+            border-color: #9ca3af;
+            color: #111827 !important;
+        }
         .input-field {
             width: 100%;
             padding: 0.75rem 1rem;
