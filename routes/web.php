@@ -66,6 +66,12 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/{id}', [ClienteController::class, 'show'])->name('show');
     });
 
+    // Ações admin em clientes
+    Route::middleware(['role:admin'])->prefix('clientes')->name('clientes.')->group(function () {
+        Route::patch('/{id}/cancel-subscription', [ClienteController::class, 'cancelSubscription'])->name('cancel-subscription');
+        Route::post('/{id}/login-as', [ClienteController::class, 'loginAs'])->name('login-as');
+    });
+
     // Busca global
     Route::get('/busca', [BuscaController::class, 'index'])->name('busca.index');
 

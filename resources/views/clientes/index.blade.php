@@ -2,9 +2,19 @@
 
 @section('content')
 @php
-    $filtroAtivo = $filtroAtivo ?? 'todos';
     $busca = $busca ?? '';
     $statusFiltro = $statusFiltro ?? '';
+    $statusLabels = [
+        'operacao' => 'Operação',
+        'trial' => 'Trial',
+        'cancelado' => 'Cancelado',
+    ];
+    $statusStyles = [
+        'operacao' => 'bg-emerald-100 text-emerald-700',
+        'trial' => 'bg-amber-100 text-amber-700',
+        'cancelado' => 'bg-rose-100 text-rose-700',
+    ];
+    $temFiltroAtivo = !empty($busca) || !empty($statusFiltro);
 @endphp
 <div class="flex min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
     <x-sidebar />
@@ -21,38 +31,7 @@
                 </div>
             </div>
 
-            <section class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                @php
-                    $filtros = [
-                        'Total Clientes' => 'todos',
-                        'Onboardings em andamento' => 'onboarding',
-                        'Risco de churn' => 'risco'
-                    ];
-                @endphp
-                
-                @foreach($metrics as $metric)
-                    @php
-                        $filtro = $filtros[$metric['label']] ?? 'todos';
-                        $filtroSelecionado = ($filtroAtivo ?? 'todos') === $filtro;
-                    @endphp
-                    <a href="{{ route('clientes.index', ['filtro' => $filtro]) }}" 
-                       class="card p-5 cursor-pointer transition-all duration-200 hover:shadow-lg {{ $filtroSelecionado ? 'ring-2 ring-blue-500 shadow-md' : '' }}">
-                        <p class="text-sm font-medium text-gray-500">{{ $metric['label'] }}</p>
-                        <p class="text-3xl font-bold text-gray-900 mt-2">{{ $metric['value'] }}</p>
-                        <p class="text-sm mt-2 {{ $metric['trend_positive'] ? 'text-emerald-600' : 'text-rose-600' }}">
-                            {{ $metric['trend'] }}
-                        </p>
-                    </a>
-                @endforeach
-            </section>
-
             <section class="card p-6 space-y-4">
-                @php
-                    $temFiltroAtivo = (isset($filtroAtivo) && $filtroAtivo !== 'todos') || 
-                                     (!empty($busca)) || 
-                                     (!empty($statusFiltro));
-                @endphp
-                
                 @if($temFiltroAtivo)
                     <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg mb-4">
                         <div class="flex items-center justify-between flex-wrap gap-2">
@@ -62,21 +41,12 @@
                                 </svg>
                                 <p class="text-sm font-medium text-blue-800">
                                     Filtros ativos:
-                                    @if(isset($filtroAtivo) && $filtroAtivo !== 'todos')
-                                        <span class="font-bold">
-                                            @if($filtroAtivo === 'onboarding') Onboardings em andamento
-                                            @elseif($filtroAtivo === 'risco') Risco de churn
-                                            @else {{ ucfirst($filtroAtivo) }}
-                                            @endif
-                                        </span>
-                                    @endif
                                     @if(!empty($busca))
-                                        @if(isset($filtroAtivo) && $filtroAtivo !== 'todos'), @endif
                                         <span class="font-bold">Busca: "{{ $busca }}"</span>
                                     @endif
                                     @if(!empty($statusFiltro))
-                                        @if((isset($filtroAtivo) && $filtroAtivo !== 'todos') || !empty($busca)), @endif
-                                        <span class="font-bold">Status: {{ ucfirst($statusFiltro) }}</span>
+                                        @if(!empty($busca)), @endif
+                                        <span class="font-bold">Status: {{ $statusLabels[$statusFiltro] ?? ucfirst($statusFiltro) }}</span>
                                     @endif
                                 </p>
                             </div>
@@ -88,10 +58,6 @@
                 @endif
                 
                 <form method="GET" action="{{ route('clientes.index') }}" class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-                    @if(isset($filtroAtivo) && $filtroAtivo !== 'todos')
-                        <input type="hidden" name="filtro" value="{{ $filtroAtivo }}">
-                    @endif
-                    
                     <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
                         <div>
                             <label class="text-sm text-gray-600">Buscar</label>
@@ -110,9 +76,9 @@
                             <label class="text-sm text-gray-600">Status</label>
                             <select name="status" class="input-field">
                                 <option value="">Todos</option>
-                                <option value="ativo" {{ ($statusFiltro ?? '') === 'ativo' ? 'selected' : '' }}>Ativo</option>
-                                <option value="onboarding" {{ ($statusFiltro ?? '') === 'onboarding' ? 'selected' : '' }}>Onboarding</option>
-                                <option value="risco" {{ ($statusFiltro ?? '') === 'risco' ? 'selected' : '' }}>Risco</option>
+                                <option value="operacao" {{ ($statusFiltro ?? '') === 'operacao' ? 'selected' : '' }}>Operação</option>
+                                <option value="trial" {{ ($statusFiltro ?? '') === 'trial' ? 'selected' : '' }}>Trial</option>
+                                <option value="cancelado" {{ ($statusFiltro ?? '') === 'cancelado' ? 'selected' : '' }}>Cancelado</option>
                             </select>
                         </div>
                     </div>
@@ -132,19 +98,11 @@
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Telefone</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Desde</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">MRR</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"></th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-100">
                             @foreach($clientes as $cliente)
-                                @php
-                                    $statusStyles = [
-                                        'ativo' => 'bg-emerald-100 text-emerald-700',
-                                        'onboarding' => 'bg-amber-100 text-amber-700',
-                                        'risco' => 'bg-rose-100 text-rose-700',
-                                    ];
-                                @endphp
                                 <tr class="hover:bg-gray-50">
                                     <td class="px-4 py-4">
                                         <p class="font-semibold text-gray-900">{{ $cliente['name'] }}</p>
@@ -154,11 +112,10 @@
                                     <td class="px-4 py-4 text-sm text-gray-600">{{ $cliente['telefone'] ?? '-' }}</td>
                                     <td class="px-4 py-4">
                                         <span class="px-2 py-1 text-xs font-semibold rounded-full {{ $statusStyles[$cliente['status']] ?? 'bg-gray-100 text-gray-600' }}">
-                                            {{ ucfirst($cliente['status']) }}
+                                            {{ $statusLabels[$cliente['status']] ?? ucfirst($cliente['status']) }}
                                         </span>
                                     </td>
                                     <td class="px-4 py-4 text-sm text-gray-600">{{ $cliente['since'] }}</td>
-                                    <td class="px-4 py-4 text-sm font-semibold text-gray-900">{{ $cliente['mrr'] }}</td>
                                     <td class="px-4 py-4 text-right">
                                         <a href="{{ route('clientes.show', $cliente['id']) }}" class="text-blue-600 hover:text-blue-800 text-sm font-medium">Detalhes</a>
                                     </td>
@@ -168,11 +125,11 @@
                     </table>
                 </div>
 
-                @if($clientes->isEmpty() && isset($filtroAtivo) && $filtroAtivo !== 'todos')
+                @if($clientes->isEmpty() && $temFiltroAtivo)
                     <div class="text-center py-12">
-                        <p class="text-gray-500 text-lg">Nenhum cliente encontrado com o filtro selecionado.</p>
+                        <p class="text-gray-500 text-lg">Nenhum cliente encontrado com os filtros selecionados.</p>
                         <a href="{{ route('clientes.index') }}" class="text-blue-600 hover:text-blue-800 mt-2 inline-block">
-                            Limpar filtro
+                            Limpar filtros
                         </a>
                     </div>
                 @endif
@@ -180,13 +137,6 @@
                 <!-- Mobile cards -->
                 <div class="grid grid-cols-1 gap-4 md:hidden">
                     @foreach($clientes as $cliente)
-                        @php
-                            $statusStyles = [
-                                'ativo' => 'bg-emerald-100 text-emerald-700',
-                                'onboarding' => 'bg-amber-100 text-amber-700',
-                                'risco' => 'bg-rose-100 text-rose-700',
-                            ];
-                        @endphp
                         <div class="border border-gray-200 rounded-2xl p-4 bg-white shadow-sm">
                             <div class="flex items-start justify-between gap-3">
                                 <div>
@@ -194,14 +144,13 @@
                                     <p class="text-sm text-gray-500">{{ $cliente['owner'] }}</p>
                                 </div>
                                 <span class="px-2 py-1 text-xs font-semibold rounded-full {{ $statusStyles[$cliente['status']] ?? 'bg-gray-100 text-gray-600' }}">
-                                    {{ ucfirst($cliente['status']) }}
+                                    {{ $statusLabels[$cliente['status']] ?? ucfirst($cliente['status']) }}
                                 </span>
                             </div>
                             <div class="mt-3 text-sm text-gray-600 space-y-1">
                                 <p><strong class="text-gray-700">Segmento:</strong> {{ $cliente['segment'] }}</p>
                                 <p><strong class="text-gray-700">Telefone:</strong> {{ $cliente['telefone'] ?? '-' }}</p>
                                 <p><strong class="text-gray-700">Desde:</strong> {{ $cliente['since'] }}</p>
-                                <p><strong class="text-gray-700">MRR:</strong> {{ $cliente['mrr'] }}</p>
                             </div>
                             <div class="mt-4 flex justify-end">
                                 <a href="{{ route('clientes.show', $cliente['id']) }}" class="text-blue-600 hover:text-blue-800 text-sm font-medium">Ver detalhes</a>
@@ -210,11 +159,11 @@
                     @endforeach
                 </div>
 
-                @if($clientes->isEmpty() && isset($filtroAtivo) && $filtroAtivo !== 'todos')
+                @if($clientes->isEmpty() && $temFiltroAtivo)
                     <div class="text-center py-12 md:hidden">
-                        <p class="text-gray-500 text-lg">Nenhum cliente encontrado com o filtro selecionado.</p>
+                        <p class="text-gray-500 text-lg">Nenhum cliente encontrado com os filtros selecionados.</p>
                         <a href="{{ route('clientes.index') }}" class="text-blue-600 hover:text-blue-800 mt-2 inline-block">
-                            Limpar filtro
+                            Limpar filtros
                         </a>
                     </div>
                 @endif
@@ -223,4 +172,3 @@
     </main>
 </div>
 @endsection
-

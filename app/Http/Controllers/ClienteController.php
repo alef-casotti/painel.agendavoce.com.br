@@ -10,7 +10,7 @@ use Carbon\Carbon;
 class ClienteController extends Controller
 {
     /**
-     * Lista principal de clientes com métricas resumidas.
+     * Lista principal de clientes.
      */
     public function index(Request $request)
     {
@@ -18,9 +18,8 @@ class ClienteController extends Controller
         $baseUrl = config('services.usuarios.base_url');
         $apiToken = config('services.usuarios.api_token');
 
-        $filtroAtivo = $request->get('filtro', 'todos'); // 'todos', 'onboarding', 'risco'
         $busca = $request->get('busca', '');
-        $statusFiltro = $request->get('status', ''); // Filtro por status (ativo, onboarding, risco)
+        $statusFiltro = $request->get('status', ''); // operacao, trial, cancelado
         
         // Remover formatação do telefone se a busca parecer ser um telefone
         // Remove parênteses, traços, espaços e outros caracteres não numéricos
@@ -34,30 +33,10 @@ class ClienteController extends Controller
         }
         
         $clientes = collect([]);
-        $metrics = [
-            [
-                'label' => 'Total Clientes',
-                'value' => 0,
-                'trend' => 'Carregando...',
-                'trend_positive' => true,
-            ],
-            [
-                'label' => 'Onboardings em andamento',
-                'value' => 0,
-                'trend' => 'Carregando...',
-                'trend_positive' => true,
-            ],
-            [
-                'label' => 'Risco de churn',
-                'value' => 0,
-                'trend' => 'Carregando...',
-                'trend_positive' => false,
-            ],
-        ];
 
         if (!$baseUrl || !$apiToken) {
             Log::warning('Configuração da API de usuários não encontrada');
-            return view('clientes.index', compact('metrics', 'clientes', 'filtroAtivo', 'busca', 'statusFiltro'));
+            return view('clientes.index', compact('clientes', 'busca', 'statusFiltro'));
         }
 
         try {
@@ -65,6 +44,9 @@ class ClienteController extends Controller
             $params = [];
             if (!empty($busca)) {
                 $params['busca'] = $busca;
+            }
+            if (!empty($statusFiltro)) {
+                $params['status'] = $statusFiltro;
             }
             
             $response = Http::timeout(10)
@@ -74,27 +56,10 @@ class ClienteController extends Controller
 
             if ($response->successful()) {
                 $data = $response->json('data', []);
-                $meta = $response->json('meta', []);
 
                 // Transformar os dados da API para o formato esperado pela view
                 $clientes = collect($data)->map(function ($usuario) {
-                    // Determinar status baseado no plano e dados do endpoint
-                    $status = 'ativo';
-                    
-                    // Onboarding: plano free sem agendamentos OU plano qualquer sem agendamentos mas com serviços cadastrados
-                    if ($usuario['total_agendamentos'] === 0) {
-                        if ($usuario['plano'] === 'free' || ($usuario['total_servicos'] > 0)) {
-                            $status = 'onboarding';
-                        } else {
-                            // Risco: sem agendamentos e sem serviços
-                            $status = 'risco';
-                        }
-                    }
-                    
-                    // Risco adicional: cliente com pouca ou nenhuma atividade
-                    if ($usuario['total_agendamentos'] === 0 && $usuario['total_servicos'] === 0 && $usuario['total_clientes'] === 0) {
-                        $status = 'risco';
-                    }
+                    $status = $this->normalizarStatusConta($usuario);
 
                     // Formatar data em português
                     $meses = [
@@ -111,7 +76,6 @@ class ClienteController extends Controller
                         'segment' => $usuario['tipo_negocio_label'] ?? $usuario['tipo_negocio'],
                         'status' => $status,
                         'since' => $dataCriacao,
-                        'mrr' => $this->formatarPlano($usuario['plano']),
                         'id' => $usuario['id'],
                         'telefone' => $this->formatarTelefone($usuario['telefone'] ?? ''),
                         'plano' => $usuario['plano'],
@@ -122,33 +86,6 @@ class ClienteController extends Controller
                     ];
                 });
 
-                // Calcular métricas baseadas nos dados do endpoint
-                $totalClientes = $meta['total'] ?? count($data);
-                $clientesOnboarding = $clientes->where('status', 'onboarding')->count();
-                $clientesRisco = $clientes->where('status', 'risco')->count();
-                
-                // Calcular métricas adicionais para trends
-                $onboardingComServicos = $clientes->where('status', 'onboarding')
-                    ->where('total_servicos', '>', 0)
-                    ->count();
-                
-                $riscoSemAtividade = $clientes->where('status', 'risco')
-                    ->where('total_servicos', 0)
-                    ->where('total_clientes', 0)
-                    ->count();
-                
-                // Gerar mensagens de trend baseadas nos dados reais
-                $trendOnboarding = $this->gerarTrendOnboarding($onboardingComServicos, $clientesOnboarding);
-                $trendRisco = $this->gerarTrendRisco($riscoSemAtividade, $clientesRisco);
-
-                // Aplicar filtro de card (filtro) se solicitado
-                if ($filtroAtivo !== 'todos') {
-                    $clientes = $clientes->filter(function ($cliente) use ($filtroAtivo) {
-                        return $cliente['status'] === $filtroAtivo;
-                    })->values(); // Reindexar a coleção após filtrar
-                }
-                
-                // Aplicar filtro de status (select) se solicitado
                 if (!empty($statusFiltro)) {
                     $clientes = $clientes->filter(function ($cliente) use ($statusFiltro) {
                         return $cliente['status'] === $statusFiltro;
@@ -157,27 +94,6 @@ class ClienteController extends Controller
 
                 // Ordenar por nome em ordem alfabética
                 $clientes = $clientes->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)->values();
-
-                $metrics = [
-                    [
-                        'label' => 'Total Clientes',
-                        'value' => $totalClientes,
-                        'trend' => $this->gerarTrendTotal($totalClientes),
-                        'trend_positive' => true,
-                    ],
-                    [
-                        'label' => 'Onboardings em andamento',
-                        'value' => $clientesOnboarding,
-                        'trend' => $trendOnboarding,
-                        'trend_positive' => $clientesOnboarding > 0 && $onboardingComServicos > 0,
-                    ],
-                    [
-                        'label' => 'Risco de churn',
-                        'value' => $clientesRisco,
-                        'trend' => $trendRisco,
-                        'trend_positive' => false,
-                    ],
-                ];
             } else {
                 Log::warning('API de usuários retornou erro', [
                     'status' => $response->status(),
@@ -190,21 +106,39 @@ class ClienteController extends Controller
             ]);
         }
 
-        return view('clientes.index', compact('metrics', 'clientes', 'filtroAtivo', 'busca', 'statusFiltro'));
+        return view('clientes.index', compact('clientes', 'busca', 'statusFiltro'));
     }
 
     /**
-     * Formatar o plano para exibição
+     * Normalizar status da conta para operacao, trial ou cancelado.
      */
-    private function formatarPlano($plano)
+    private function normalizarStatusConta(array $usuario): string
     {
-        $planos = [
-            'free' => 'Plano Grátis',
-            'pro' => 'Plano Pro',
-            'premium' => 'Plano Premium',
-        ];
+        $status = $usuario['status']
+            ?? $usuario['status_conta']
+            ?? $usuario['situacao']
+            ?? null;
 
-        return $planos[$plano] ?? ucfirst($plano);
+        if ($status !== null && $status !== '') {
+            $status = strtolower((string) $status);
+
+            return match (true) {
+                in_array($status, ['operacao', 'em_operacao', 'operação', 'ativo', 'active'], true) => 'operacao',
+                in_array($status, ['trial', 'em_trial'], true) => 'trial',
+                in_array($status, ['cancelado', 'cancelada', 'canceladas', 'canceled', 'cancelled'], true) => 'cancelado',
+                default => 'operacao',
+            };
+        }
+
+        if (!empty($usuario['assinatura_cancelada']) || !empty($usuario['cancelado'])) {
+            return 'cancelado';
+        }
+
+        if (($usuario['plano'] ?? '') === 'free') {
+            return 'trial';
+        }
+
+        return 'operacao';
     }
 
     /**
@@ -230,61 +164,6 @@ class ClienteController extends Controller
 
         // Se não tiver 10 ou 11 dígitos, retorna como está
         return $telefone;
-    }
-
-    /**
-     * Gerar mensagem de trend para total de clientes
-     */
-    private function gerarTrendTotal($totalClientes)
-    {
-        if ($totalClientes === 0) {
-            return 'Nenhum cliente cadastrado';
-        }
-        
-        // Por enquanto retorna uma mensagem genérica, pode ser melhorada quando tiver dados históricos
-        return "Total de {$totalClientes} cliente(s)";
-    }
-
-    /**
-     * Gerar mensagem de trend para onboardings baseada nos dados do endpoint
-     */
-    private function gerarTrendOnboarding($onboardingComServicos, $totalOnboarding)
-    {
-        if ($totalOnboarding === 0) {
-            return 'Nenhum onboarding em andamento';
-        }
-
-        if ($onboardingComServicos > 0) {
-            if ($onboardingComServicos === 1) {
-                return "1 cliente pronto para primeiro agendamento";
-            }
-            return "{$onboardingComServicos} cliente(s) pronto(s) para primeiro agendamento";
-        }
-
-        return "{$totalOnboarding} cliente(s) em configuração inicial";
-    }
-
-    /**
-     * Gerar mensagem de trend para risco de churn baseada nos dados do endpoint
-     */
-    private function gerarTrendRisco($riscoSemAtividade, $totalRisco)
-    {
-        if ($totalRisco === 0) {
-            return 'Nenhum cliente em risco';
-        }
-
-        if ($riscoSemAtividade > 0) {
-            if ($riscoSemAtividade === 1) {
-                return "1 cliente sem atividade cadastrada";
-            }
-            return "{$riscoSemAtividade} cliente(s) sem atividade cadastrada";
-        }
-
-        if ($totalRisco === 1) {
-            return "1 cliente precisa de follow-up";
-        }
-
-        return "{$totalRisco} cliente(s) precisam de follow-up";
     }
 
     /**
@@ -345,25 +224,18 @@ class ClienteController extends Controller
      */
     private function formatarDadosCliente($cliente)
     {
-        // Garantir que campos de texto sejam strings
-        if (isset($cliente['tipo_negocio_label']) && is_array($cliente['tipo_negocio_label'])) {
-            $cliente['tipo_negocio_label'] = is_string($cliente['tipo_negocio'] ?? '') 
-                ? $cliente['tipo_negocio'] 
-                : '-';
-        }
-        if (isset($cliente['tipo_negocio']) && is_array($cliente['tipo_negocio'])) {
-            $cliente['tipo_negocio'] = '-';
-        }
-        
-        // Formatar telefone
         $cliente['telefone_formatado'] = $this->formatarTelefone($cliente['telefone'] ?? '');
 
-        // Formatar datas
         $meses = [
             1 => 'Jan', 2 => 'Fev', 3 => 'Mar', 4 => 'Abr',
             5 => 'Mai', 6 => 'Jun', 7 => 'Jul', 8 => 'Ago',
-            9 => 'Set', 10 => 'Out', 11 => 'Nov', 12 => 'Dez'
+            9 => 'Set', 10 => 'Out', 11 => 'Nov', 12 => 'Dez',
         ];
+
+        if (!empty($cliente['email_verificado_em'])) {
+            $dataCarbon = Carbon::parse($cliente['email_verificado_em']);
+            $cliente['email_verificado_em_formatada'] = $dataCarbon->format('d') . ' ' . $meses[$dataCarbon->month] . ' ' . $dataCarbon->format('Y');
+        }
 
         if (!empty($cliente['data_criacao'])) {
             $dataCarbon = Carbon::parse($cliente['data_criacao']);
@@ -375,7 +247,11 @@ class ClienteController extends Controller
             $cliente['data_atualizacao_formatada'] = $dataCarbon->format('d') . ' ' . $meses[$dataCarbon->month] . ' ' . $dataCarbon->format('Y');
         }
 
-        // Formatar assinatura ativa
+        if (!empty($cliente['ultimo_acesso_em'])) {
+            $dataCarbon = Carbon::parse($cliente['ultimo_acesso_em']);
+            $cliente['ultimo_acesso_em_formatada'] = $dataCarbon->format('d') . ' ' . $meses[$dataCarbon->month] . ' ' . $dataCarbon->format('Y') . ' às ' . $dataCarbon->format('H:i');
+        }
+
         if (!empty($cliente['assinatura_ativa'])) {
             $assinatura = $cliente['assinatura_ativa'];
             if (!empty($assinatura['started_at'])) {
@@ -389,66 +265,146 @@ class ClienteController extends Controller
             $cliente['assinatura_ativa'] = $assinatura;
         }
 
-        // Formatar histórico de assinaturas
-        if (!empty($cliente['historico_assinaturas'])) {
-            foreach ($cliente['historico_assinaturas'] as &$historico) {
-                if (!empty($historico['started_at'])) {
-                    $dataCarbon = Carbon::parse($historico['started_at']);
-                    $historico['started_at_formatada'] = $dataCarbon->format('d') . ' ' . $meses[$dataCarbon->month] . ' ' . $dataCarbon->format('Y');
-                }
-                if (!empty($historico['expires_at'])) {
-                    $dataCarbon = Carbon::parse($historico['expires_at']);
-                    $historico['expires_at_formatada'] = $dataCarbon->format('d') . ' ' . $meses[$dataCarbon->month] . ' ' . $dataCarbon->format('Y');
-                }
-                if (!empty($historico['canceled_at'])) {
-                    $dataCarbon = Carbon::parse($historico['canceled_at']);
-                    $historico['canceled_at_formatada'] = $dataCarbon->format('d') . ' ' . $meses[$dataCarbon->month] . ' ' . $dataCarbon->format('Y');
-                }
-                if (!empty($historico['criado_em'])) {
-                    $dataCarbon = Carbon::parse($historico['criado_em']);
-                    $historico['criado_em_formatada'] = $dataCarbon->format('d') . ' ' . $meses[$dataCarbon->month] . ' ' . $dataCarbon->format('Y');
-                }
-            }
+        $cliente['cancelamento_agendado'] = $this->temCancelamentoAgendado($cliente);
+
+        if (!empty($cliente['suporte']['ultimo_ticket']['criado_em'])) {
+            $dataCarbon = Carbon::parse($cliente['suporte']['ultimo_ticket']['criado_em']);
+            $cliente['suporte']['ultimo_ticket']['criado_em_formatada'] = $dataCarbon->format('d') . ' ' . $meses[$dataCarbon->month] . ' ' . $dataCarbon->format('Y');
         }
 
-        // Formatar agendamentos recentes
-        if (!empty($cliente['agendamentos_recentes'])) {
-            foreach ($cliente['agendamentos_recentes'] as &$agendamento) {
-                if (!empty($agendamento['data'])) {
-                    $dataCarbon = Carbon::parse($agendamento['data']);
-                    $agendamento['data_formatada'] = $dataCarbon->format('d') . ' ' . $meses[$dataCarbon->month] . ' ' . $dataCarbon->format('Y');
-                }
-                if (!empty($agendamento['criado_em'])) {
-                    $dataCarbon = Carbon::parse($agendamento['criado_em']);
-                    $agendamento['criado_em_formatada'] = $dataCarbon->format('d/m/Y H:i');
-                }
-            }
+        if (!empty($cliente['pagina_publica']['slug'])) {
+            $publicBase = rtrim(config('services.agendavoce.public_url', 'https://agendavoce.com.br'), '/');
+            $cliente['pagina_publica']['url'] = $publicBase . '/p/' . $cliente['pagina_publica']['slug'];
         }
 
-        // Formatar horários de funcionamento
-        if (!empty($cliente['horarios_funcionamento']) && is_array($cliente['horarios_funcionamento'])) {
-            $diasSemana = [
-                0 => 'Domingo',
-                1 => 'Segunda-feira',
-                2 => 'Terça-feira',
-                3 => 'Quarta-feira',
-                4 => 'Quinta-feira',
-                5 => 'Sexta-feira',
-                6 => 'Sábado'
-            ];
-            
-            usort($cliente['horarios_funcionamento'], function($a, $b) {
-                return ($a['dia_semana'] ?? 0) <=> ($b['dia_semana'] ?? 0);
-            });
-        }
-        
-        // Garantir que próximo_agendamento seja null se for array vazio ou não definido corretamente
-        if (isset($cliente['engajamento']['proximo_agendamento']) && 
-            is_array($cliente['engajamento']['proximo_agendamento']) && 
-            empty($cliente['engajamento']['proximo_agendamento'])) {
-            $cliente['engajamento']['proximo_agendamento'] = null;
+        if (!empty($cliente['profissionais_equipe'])) {
+            foreach ($cliente['profissionais_equipe'] as &$profissional) {
+                $profissional['telefone_formatado'] = $this->formatarTelefone($profissional['telefone'] ?? '');
+            }
         }
 
         return $cliente;
+    }
+
+    /**
+     * Verifica se o cancelamento da assinatura já está agendado.
+     */
+    private function temCancelamentoAgendado(array $cliente): bool
+    {
+        if (!empty($cliente['assinatura_cancelada']) || !empty($cliente['cancelado'])) {
+            return true;
+        }
+
+        $assinatura = $cliente['assinatura_ativa'] ?? null;
+        if (empty($assinatura)) {
+            return false;
+        }
+
+        if (!empty($assinatura['cancel_at_period_end'])) {
+            return true;
+        }
+
+        $status = strtolower((string) ($assinatura['status'] ?? ''));
+
+        return in_array($status, ['cancel_at_period_end', 'canceled', 'cancelled'], true);
+    }
+
+    /**
+     * Agendar cancelamento da assinatura do cliente (admin).
+     */
+    public function cancelSubscription($id)
+    {
+        if (!auth()->user()->isAdmin()) {
+            abort(403);
+        }
+
+        $baseUrl = config('services.usuarios.base_url');
+        $apiToken = config('services.usuarios.api_token');
+
+        if (!$baseUrl || !$apiToken) {
+            return redirect()->route('clientes.show', $id)->with('error', 'Configuração da API não encontrada');
+        }
+
+        try {
+            $response = Http::timeout(10)
+                ->withToken($apiToken)
+                ->acceptJson()
+                ->patch("{$baseUrl}/api/usuarios/{$id}/cancel-subscription");
+
+            $status = $response->status();
+
+            $message = match ($status) {
+                200 => $response->json('message', 'Cancelamento da assinatura agendado com sucesso.'),
+                404 => 'Cliente não encontrado.',
+                422 => 'Cliente não possui assinatura ativa.',
+                409 => 'Cancelamento já estava agendado.',
+                502 => 'Falha ao processar cancelamento no Stripe.',
+                default => 'Erro ao agendar cancelamento da assinatura.',
+            };
+
+            $flashType = match ($status) {
+                200 => 'success',
+                409 => 'warning',
+                default => $response->successful() ? 'success' : 'error',
+            };
+
+            return redirect()->route('clientes.show', $id)->with($flashType, $message);
+        } catch (\Throwable $exception) {
+            Log::error('Erro ao cancelar assinatura do cliente', [
+                'message' => $exception->getMessage(),
+                'cliente_id' => $id,
+            ]);
+
+            return redirect()->route('clientes.show', $id)->with('error', 'Erro ao conectar com a API');
+        }
+    }
+
+    /**
+     * Login do admin na conta do cliente (admin).
+     */
+    public function loginAs($id)
+    {
+        if (!auth()->user()->isAdmin()) {
+            abort(403);
+        }
+
+        $baseUrl = config('services.usuarios.base_url');
+        $apiToken = config('services.usuarios.api_token');
+
+        if (!$baseUrl || !$apiToken) {
+            return redirect()->route('clientes.show', $id)->with('error', 'Configuração da API não encontrada');
+        }
+
+        try {
+            $response = Http::timeout(10)
+                ->withToken($apiToken)
+                ->acceptJson()
+                ->post("{$baseUrl}/api/usuarios/{$id}/login-as");
+
+            if ($response->successful()) {
+                $url = $response->json('url') ?? $response->json('data.url');
+
+                if ($url) {
+                    return redirect()->away($url);
+                }
+            }
+
+            Log::warning('API login-as retornou erro', [
+                'status' => $response->status(),
+                'body' => $response->json(),
+                'cliente_id' => $id,
+            ]);
+
+            $message = $response->json('message', 'Não foi possível gerar acesso à conta do cliente.');
+
+            return redirect()->route('clientes.show', $id)->with('error', $message);
+        } catch (\Throwable $exception) {
+            Log::error('Erro ao fazer login na conta do cliente', [
+                'message' => $exception->getMessage(),
+                'cliente_id' => $id,
+            ]);
+
+            return redirect()->route('clientes.show', $id)->with('error', 'Erro ao conectar com a API');
+        }
     }
 }
