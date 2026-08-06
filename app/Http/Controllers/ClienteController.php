@@ -360,15 +360,17 @@ class ClienteController extends Controller
     }
 
     /**
-     * Login do admin na conta do cliente (admin).
+     * Impersonate: gera URL de acesso ao perfil do cliente (admin e suporte).
      */
-    public function loginAs($id)
+    public function impersonate(Request $request, $id)
     {
-        if (!auth()->user()->isAdmin()) {
+        $user = auth()->user();
+
+        if (!$user->isAdmin() && !$user->isSuporte()) {
             abort(403);
         }
 
-        $baseUrl = config('services.usuarios.base_url');
+        $baseUrl = rtrim(config('services.usuarios.base_url') ?? '', '/');
         $apiToken = config('services.usuarios.api_token');
 
         if (!$baseUrl || !$apiToken) {
@@ -379,7 +381,13 @@ class ClienteController extends Controller
             $response = Http::timeout(10)
                 ->withToken($apiToken)
                 ->acceptJson()
-                ->post("{$baseUrl}/api/usuarios/{$id}/login-as");
+                ->post("{$baseUrl}/api/usuarios/{$id}/impersonate", [
+                    'support_user_id' => $user->id,
+                    'support_email' => $user->email,
+                    'reason' => 'Acesso via painel',
+                    'request_ip' => $request->ip(),
+                    'request_user_agent' => $request->userAgent(),
+                ]);
 
             if ($response->successful()) {
                 $url = $response->json('url') ?? $response->json('data.url');
@@ -389,17 +397,22 @@ class ClienteController extends Controller
                 }
             }
 
-            Log::warning('API login-as retornou erro', [
+            Log::warning('API impersonate retornou erro', [
                 'status' => $response->status(),
                 'body' => $response->json(),
                 'cliente_id' => $id,
             ]);
 
-            $message = $response->json('message', 'Não foi possível gerar acesso à conta do cliente.');
+            $message = match ($response->status()) {
+                401 => 'Token de API ausente ou inválido.',
+                404 => "Usuário {$id} não existe.",
+                422 => $response->json('message', 'Dados inválidos para impersonate.'),
+                default => $response->json('message', 'Não foi possível gerar acesso à conta do cliente.'),
+            };
 
             return redirect()->route('clientes.show', $id)->with('error', $message);
         } catch (\Throwable $exception) {
-            Log::error('Erro ao fazer login na conta do cliente', [
+            Log::error('Erro ao impersonar conta do cliente', [
                 'message' => $exception->getMessage(),
                 'cliente_id' => $id,
             ]);

@@ -71,7 +71,11 @@ Route::middleware(['auth'])->group(function () {
     // Ações admin em clientes
     Route::middleware(['role:admin'])->prefix('clientes')->name('clientes.')->group(function () {
         Route::patch('/{id}/cancel-subscription', [ClienteController::class, 'cancelSubscription'])->name('cancel-subscription');
-        Route::post('/{id}/login-as', [ClienteController::class, 'loginAs'])->name('login-as');
+    });
+
+    // Impersonate: admin e suporte
+    Route::middleware(['role:admin,suporte'])->prefix('clientes')->name('clientes.')->group(function () {
+        Route::post('/{id}/impersonate', [ClienteController::class, 'impersonate'])->name('impersonate');
     });
 
     // Busca global
