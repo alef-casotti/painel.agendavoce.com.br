@@ -85,11 +85,13 @@
         min-height: 96px;
     }
     .carrossel-slide-live .badge {
-        display: inline-flex;
-        align-items: center;
-        padding: 14px 28px;
+        display: block;
+        box-sizing: border-box;
+        height: 56px;
+        line-height: 56px;
+        padding: 0 28px;
         border-radius: 14px;
-        font-family: 'Newsreader', 'Georgia', serif;
+        font-family: 'Source Sans Pro', 'Segoe UI', sans-serif;
         font-size: 24px;
         font-weight: 700;
         letter-spacing: 0.06em;
@@ -98,6 +100,14 @@
         background: var(--slide-accent);
         color: #fff;
         box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+        white-space: nowrap;
+    }
+    .carrossel-slide-live .badge-label,
+    .carrossel-slide-live .brand-label {
+        display: inline-block;
+        line-height: inherit;
+        position: relative;
+        top: 0;
     }
     .carrossel-slide-live .accent-bar {
         width: 96px;
@@ -154,11 +164,15 @@
         box-shadow: 0 0 0 6px var(--slide-accent-soft);
     }
     .carrossel-slide-live .brand {
+        display: block;
+        box-sizing: border-box;
+        height: 30px;
+        line-height: 30px;
         font-family: 'Source Sans Pro', 'Segoe UI', sans-serif;
         font-size: 30px;
         font-weight: 700;
         letter-spacing: -0.015em;
-        line-height: 1;
+        white-space: nowrap;
     }
     .carrossel-slide-live .page {
         font-family: 'Newsreader', 'Georgia', serif;
@@ -170,6 +184,17 @@
     .carrossel-slide-live .page-sep {
         opacity: 0.5;
         margin: 0 4px;
+    }
+
+    /* Esconde o export sem zerá-lo (clip/opacity quebram a captura) */
+    .slides-export-root {
+        position: fixed;
+        left: 0;
+        top: 0;
+        z-index: -1;
+        pointer-events: none;
+        width: 1080px;
+        transform: translateX(-120vw);
     }
 
     .modelo-organizacao {

@@ -79,11 +79,13 @@
     }
 
     .carrossel-slide .badge {
-        display: inline-flex;
-        align-items: center;
-        padding: 14px 28px;
+        display: block;
+        box-sizing: border-box;
+        height: 56px;
+        line-height: 56px;
+        padding: 0 28px;
         border-radius: 14px;
-        font-family: 'Newsreader', 'Georgia', serif;
+        font-family: 'Source Sans Pro', 'Segoe UI', sans-serif;
         font-size: 24px;
         font-weight: 700;
         letter-spacing: 0.06em;
@@ -92,6 +94,15 @@
         background: var(--slide-accent);
         color: #fff;
         box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+        white-space: nowrap;
+    }
+
+    .carrossel-slide .badge-label,
+    .carrossel-slide .brand-label {
+        display: inline-block;
+        line-height: inherit;
+        position: relative;
+        top: 0;
     }
 
     .carrossel-slide .accent-bar {
@@ -154,11 +165,15 @@
     }
 
     .carrossel-slide .brand {
+        display: block;
+        box-sizing: border-box;
+        height: 30px;
+        line-height: 30px;
         font-family: 'Source Sans Pro', 'Segoe UI', sans-serif;
         font-size: 30px;
         font-weight: 700;
         letter-spacing: -0.015em;
-        line-height: 1;
+        white-space: nowrap;
     }
 
     .carrossel-slide .page {
