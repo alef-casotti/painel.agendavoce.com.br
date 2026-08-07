@@ -116,7 +116,7 @@
                                         <div class="slide-glow slide-glow-b"></div>
                                         <div class="slide-ring"></div>
                                         <div class="slide-top">
-                                            <span class="badge" x-show="slide.destaque" x-text="slide.destaque"></span>
+                                            <span class="badge" x-show="slide.destaque"><span class="badge-label" x-text="slide.destaque"></span></span>
                                             <div class="accent-bar"></div>
                                         </div>
                                         <div class="slide-body">
@@ -126,7 +126,7 @@
                                         <div class="footer">
                                             <div class="brand-wrap">
                                                 <span class="brand-dot"></span>
-                                                <span class="brand">Agenda Você</span>
+                                                <span class="brand"><span class="brand-label">Agenda Você</span></span>
                                             </div>
                                             <span class="page">
                                                 <span x-text="index + 1"></span>
@@ -141,7 +141,7 @@
                     </div>
 
                     <div id="slides-export-root"
-                         style="position: fixed; left: -10000px; top: 0; pointer-events: none;"
+                         class="slides-export-root"
                          aria-hidden="true">
                         <template x-for="(slide, index) in slides" :key="'export-' + index">
                             <div class="carrossel-slide-live slide-preview"
@@ -151,7 +151,7 @@
                                 <div class="slide-glow slide-glow-b"></div>
                                 <div class="slide-ring"></div>
                                 <div class="slide-top">
-                                    <span class="badge" x-show="slide.destaque" x-text="slide.destaque"></span>
+                                    <span class="badge" x-show="slide.destaque"><span class="badge-label" x-text="slide.destaque"></span></span>
                                     <div class="accent-bar"></div>
                                 </div>
                                 <div class="slide-body">
@@ -161,7 +161,7 @@
                                 <div class="footer">
                                     <div class="brand-wrap">
                                         <span class="brand-dot"></span>
-                                        <span class="brand">Agenda Você</span>
+                                        <span class="brand"><span class="brand-label">Agenda Você</span></span>
                                     </div>
                                     <span class="page">
                                         <span x-text="index + 1"></span>
@@ -271,8 +271,12 @@ function visualizarConteudo(config) {
         },
 
         async baixarImagens() {
-            if (typeof html2canvas !== 'function' || typeof JSZip === 'undefined') {
+            if (typeof html2canvas !== 'function') {
                 alert('Não foi possível carregar o gerador de imagens. Tente novamente.');
+                return;
+            }
+            if (typeof JSZip === 'undefined') {
+                alert('Não foi possível carregar o gerador de ZIP. Tente novamente.');
                 return;
             }
 
@@ -280,11 +284,33 @@ function visualizarConteudo(config) {
             await this.$nextTick();
 
             try {
+                if (document.fonts && document.fonts.ready) {
+                    await document.fonts.ready;
+                }
+                try {
+                    await Promise.all([
+                        document.fonts.load('700 24px "Source Sans Pro"'),
+                        document.fonts.load('700 30px "Source Sans Pro"'),
+                        document.fonts.load('700 72px "Playfair Display"'),
+                        document.fonts.load('500 36px "Newsreader"'),
+                    ]);
+                } catch (e) {}
+
                 const zip = new JSZip();
                 const pasta = zip.folder('carrossel') || zip;
-                const nodes = document.querySelectorAll('#slides-export-root .slide-preview');
-                let i = 0;
+                const exportRoot = document.getElementById('slides-export-root');
+                const nodes = [...document.querySelectorAll('#slides-export-root .slide-preview')];
 
+                if (!nodes.length) {
+                    throw new Error('Nenhuma página encontrada para exportar.');
+                }
+
+                if (exportRoot) {
+                    exportRoot.style.transform = 'none';
+                    exportRoot.style.zIndex = '-1';
+                }
+
+                let i = 0;
                 for (const node of nodes) {
                     i += 1;
                     const canvas = await html2canvas(node, {
@@ -293,9 +319,45 @@ function visualizarConteudo(config) {
                         height: 1350,
                         backgroundColor: null,
                         useCORS: true,
+                        logging: false,
+                        onclone(doc) {
+                            // html2canvas desce o baseline de web fonts; sobe só o texto interno
+                            // box-shadow vira mancha/quadrado escuro no PNG — remove só no clone
+                            doc.querySelectorAll('.badge').forEach((el) => {
+                                el.style.boxShadow = 'none';
+                                el.style.filter = 'none';
+                            });
+                            doc.querySelectorAll('.badge-label').forEach((el) => {
+                                el.style.position = 'relative';
+                                el.style.top = '-10px';
+                                el.style.display = 'inline-block';
+                                el.style.lineHeight = '56px';
+                                el.style.background = 'transparent';
+                                el.style.boxShadow = 'none';
+                                el.style.textShadow = 'none';
+                            });
+                            doc.querySelectorAll('.brand').forEach((el) => {
+                                el.style.overflow = 'visible';
+                                el.style.lineHeight = '30px';
+                            });
+                            doc.querySelectorAll('.brand-label').forEach((el) => {
+                                el.style.position = 'relative';
+                                el.style.top = '-16px';
+                                el.style.display = 'inline-block';
+                                el.style.lineHeight = '30px';
+                                el.style.background = 'transparent';
+                                el.style.boxShadow = 'none';
+                                el.style.textShadow = 'none';
+                            });
+                        },
                     });
                     const base64 = canvas.toDataURL('image/png').split(',')[1];
                     pasta.file(`slide-${String(i).padStart(2, '0')}.png`, base64, { base64: true });
+                }
+
+                if (exportRoot) {
+                    exportRoot.style.transform = '';
+                    exportRoot.style.zIndex = '';
                 }
 
                 const blob = await zip.generateAsync({ type: 'blob' });
@@ -308,6 +370,11 @@ function visualizarConteudo(config) {
                 URL.revokeObjectURL(link.href);
             } catch (e) {
                 console.error(e);
+                const exportRoot = document.getElementById('slides-export-root');
+                if (exportRoot) {
+                    exportRoot.style.transform = '';
+                    exportRoot.style.zIndex = '';
+                }
                 alert('Erro ao gerar o ZIP das imagens. Tente novamente.');
             } finally {
                 this.baixando = false;

@@ -5,7 +5,7 @@
 
     <div class="slide-top">
         @if(!empty($slide['destaque']))
-            <span class="badge">{{ $slide['destaque'] }}</span>
+            <span class="badge"><span class="badge-label">{{ $slide['destaque'] }}</span></span>
         @endif
         <div class="accent-bar"></div>
     </div>
@@ -18,7 +18,7 @@
     <div class="footer">
         <div class="brand-wrap">
             <span class="brand-dot"></span>
-            <span class="brand">Agenda Você</span>
+            <span class="brand"><span class="brand-label">Agenda Você</span></span>
         </div>
         <span class="page">{{ $index + 1 }} <span class="page-sep">/</span> {{ $total }}</span>
     </div>
