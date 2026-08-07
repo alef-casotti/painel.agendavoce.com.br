@@ -12,6 +12,7 @@ use App\Http\Controllers\BuscaController;
 use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\CriadorConteudoController;
 
 /*
 |--------------------------------------------------------------------------
@@ -45,6 +46,15 @@ Route::middleware(['auth'])->group(function () {
         
         // Gerenciamento de Usuários
         Route::resource('users', UserController::class);
+
+        // Criadores de Conteúdo
+        Route::get('/criadores', [CriadorConteudoController::class, 'index'])->name('criadores.index');
+        Route::get('/criadores/criar', [CriadorConteudoController::class, 'create'])->name('criadores.create');
+        Route::post('/criadores', [CriadorConteudoController::class, 'store'])->name('criadores.store');
+        Route::get('/criadores/{conteudo}', [CriadorConteudoController::class, 'show'])->name('criadores.show');
+        Route::get('/criadores/{conteudo}/editar', [CriadorConteudoController::class, 'edit'])->name('criadores.edit');
+        Route::put('/criadores/{conteudo}', [CriadorConteudoController::class, 'update'])->name('criadores.update');
+        Route::delete('/criadores/{conteudo}', [CriadorConteudoController::class, 'destroy'])->name('criadores.destroy');
     });
 
     // Área Financeiro (admin e financeiro)

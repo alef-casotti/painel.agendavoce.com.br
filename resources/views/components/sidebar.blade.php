@@ -59,6 +59,17 @@
                 <span>Dashboard</span>
             </a>
 
+            @if($user->isAdmin())
+                <a href="{{ route('admin.criadores.index') }}" 
+                   class="sidebar-link flex items-center px-4 py-3.5 {{ str_contains($currentRoute, 'admin.criadores') ? 'active text-blue-800 bg-gradient-to-r from-blue-50 to-white border-l-4 border-blue-600 shadow-md' : 'text-indigo-900 hover:bg-blue-50/80 hover:text-blue-700' }} rounded-r-lg transition-all duration-200 group"
+                   @click="sidebarOpen = false">
+                    <svg class="w-5 h-5 mr-3 flex-shrink-0 {{ str_contains($currentRoute, 'admin.criadores') ? 'text-blue-600' : 'text-indigo-600 group-hover:text-blue-600' }} transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                    </svg>
+                    <span>Redes Sociais</span>
+                </a>
+            @endif
+
             @if($user->isAdmin() || $user->isFinanceiro())
                 <a href="{{ route('financeiro.index') }}" 
                    class="sidebar-link flex items-center px-4 py-3.5 {{ str_contains($currentRoute, 'financeiro') ? 'active text-blue-800 bg-gradient-to-r from-blue-50 to-white border-l-4 border-blue-600 shadow-md' : 'text-indigo-900 hover:bg-blue-50/80 hover:text-blue-700' }} rounded-r-lg transition-all duration-200 group"
